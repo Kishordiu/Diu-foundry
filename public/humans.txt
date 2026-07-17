@@ -1,0 +1,47 @@
+/* HUMANS.TXT — The humans behind the machine */
+
+  ___  ___ _   _   ___                _
+ |   \|_ _| | | | | __|__ _  _ _ _  __| |_ _ _  _
+ | |) || || |_| | | _/ _ \ || | ' \/ _` | '_| || |
+ |___/|___|\___/  |_|\___/\_,_|_||_\__,_|_|  \_, |
+                                               |__/
+
+/* TEAM */
+  Studio: DIU Foundry
+  Role: Technology Foundry — AI, Software, IoT, Embedded Systems
+  Location: Lisbon, Portugal / Berlin, Germany / Remote
+  Website: https://diufoundry.com
+
+/* CONTACT */
+  Email: studio@diufoundry.com
+  Phone: +351 210 000 000
+
+/* TECHNOLOGY COLOPHON */
+  Framework: TanStack Start (React 19)
+  Routing: TanStack Router (file-based)
+  Styling: TailwindCSS v4 + Vanilla CSS
+  Animations: Framer Motion
+  Language: TypeScript
+  Fonts: Playfair Display, Inter (Google Fonts)
+
+/* CREDITS */
+  Design Philosophy: Swiss Editorial × Japanese Minimalism × Apple HIG
+  Icon System: Lucide React
+  Build Tool: Vite
+
+/* STANDARDS */
+  - WCAG 2.1 AA Compliant
+  - Schema.org Structured Data
+  - Open Graph Protocol
+  - Twitter Cards
+  - Web App Manifest
+  - Sitemap XML
+
+/* SITE */
+  Last update: 2026/07/16
+  Standards: HTML5, CSS3, ES2024
+  Software: Built with precision. Shipped with care.
+
+/* PHILOSOPHY */
+  Dominance · Intelligence · Unity
+  Every Idea is a Spark. Build the Flame.

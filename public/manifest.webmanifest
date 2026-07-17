@@ -1,0 +1,47 @@
+{
+  "name": "DIU Foundry",
+  "short_name": "DIU",
+  "description": "Every Idea is a Spark. Build the Flame. A premium technology foundry.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#14131a",
+  "orientation": "portrait-primary",
+  "lang": "en-US",
+  "categories": ["technology", "business"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start a Project",
+      "short_name": "Forge",
+      "description": "Begin your project intake",
+      "url": "/forge",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Our Works",
+      "short_name": "Works",
+      "description": "See our case studies",
+      "url": "/works",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

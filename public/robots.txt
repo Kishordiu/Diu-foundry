@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Disallow private/utility routes
+Disallow: /forge
+
+Sitemap: https://diufoundry.com/sitemap.xml
