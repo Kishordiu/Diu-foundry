@@ -90,7 +90,12 @@ export function Nav() {
         initial={false}
         animate={{ clipPath: open ? "circle(150% at 90% 5%)" : "circle(0% at 90% 5%)" }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed inset-0 z-40 bg-ivory/95 backdrop-blur-3xl md:hidden"
+        className="fixed inset-0 z-40 backdrop-blur-3xl md:hidden"
+        style={{
+          backgroundColor: "rgba(250,249,247,0.97)",
+          pointerEvents: open ? "auto" : "none",
+        }}
+        aria-hidden={!open}
       >
         <div className="flex h-full flex-col justify-center px-6">
           {links.map((l, i) => (
@@ -108,7 +113,8 @@ export function Nav() {
                 to={l.to}
                 hash={l.hash || undefined}
                 onClick={() => setOpen(false)}
-                className="block border-b border-violet-deep/10 py-6 font-display text-4xl text-ink transition-colors hover:text-violet-deep [&.active]:text-violet-deep"
+                className="block border-b py-6 font-display text-4xl transition-colors hover:text-violet-deep [&.active]:text-violet-deep"
+                style={{ color: "#14131a", borderColor: "rgba(75,42,143,0.1)" }}
               >
                 {l.label}
               </Link>
@@ -127,7 +133,8 @@ export function Nav() {
               to="/"
               hash="connect"
               onClick={() => setOpen(false)}
-              className="mt-8 block rounded-full bg-ink px-6 py-4 text-center text-[11px] uppercase tracking-[0.2em] text-ivory transition-all hover:bg-violet-deep hover:scale-[1.02]"
+              className="mt-8 block rounded-full px-6 py-4 text-center text-[11px] uppercase tracking-[0.2em] transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: "#14131a", color: "#faf9f7" }}
               aria-label="Start Building"
             >
               Start Building

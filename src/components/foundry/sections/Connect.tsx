@@ -1,5 +1,6 @@
 import { Mark } from "../Mark";
 import circuit from "@/assets/circuit.jpg";
+import { Link } from "@tanstack/react-router";
 
 export function Connect() {
   return (
@@ -88,27 +89,24 @@ export function Connect() {
           </div>
         </div>
 
-        <form
-          action="/forge"
-          method="GET"
-          className="col-span-12 md:col-span-5 md:col-start-8 z-10"
-        >
+        <div className="col-span-12 md:col-span-5 md:col-start-8 z-10">
           <div className="rounded-[2rem] border border-ivory/15 bg-white/[0.04] p-6 sm:p-8 backdrop-blur-xl md:p-10 flex flex-col items-center justify-center text-center">
             <h3 className="font-display text-2xl sm:text-3xl mb-3 sm:mb-4">Start your project</h3>
             <p className="text-ivory/70 mb-6 sm:mb-8 text-xs sm:text-sm text-balance">
               Use our premium project intake form to tell us about your idea, timeline, and goals.
             </p>
-            <button
-              type="submit"
-              className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-ivory px-6 py-4 text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-ink transition-colors hover:bg-[#e7d9ff]"
+            <Link
+              to="/forge"
+              className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-ivory px-6 py-4 text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-ink transition-colors hover:bg-[#e7d9ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep"
+              aria-label="Open project intake form"
             >
               Open Intake Form
               <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">
                 ↗
               </span>
-            </button>
+            </Link>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* Circuit macro art — decorative only */}

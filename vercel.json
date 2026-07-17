@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!assets|favicon|manifest|humans|sitemap|og-image|apple-touch-icon|favicon-32x32|favicon-16x16).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
