@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Nav } from "@/components/foundry/Nav";
+import { motion } from "framer-motion";
 import { Footer } from "@/components/foundry/sections/Footer";
 import { Mark } from "@/components/foundry/Mark";
 
@@ -101,7 +101,6 @@ const articleListSchema = {
 function Insights() {
   return (
     <div className="min-h-screen bg-ivory text-ink pt-24 sm:pt-32">
-      <Nav />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
@@ -127,16 +126,20 @@ function Insights() {
 
         <div className="mt-16 sm:mt-24 space-y-0 mb-24 sm:mb-32 border-t border-ink/10">
           {articles.map((article, i) => (
-            <div
+            <motion.div
               key={i}
-              className="flex flex-col md:flex-row items-start md:items-center justify-between py-8 sm:py-12 border-b border-ink/10 px-4 sm:px-6 -mx-4 sm:-mx-6 rounded-2xl"
+              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="group flex flex-col md:flex-row items-start md:items-center justify-between py-8 sm:py-12 border-b border-ink/10 px-4 sm:px-6 -mx-4 sm:-mx-6 rounded-2xl transition-all duration-500 hover:bg-white hover:shadow-[0_8px_30px_-10px_rgba(75,42,143,0.1)] hover:-translate-y-1 hover:border-transparent cursor-pointer"
               aria-label={article.title}
             >
               <div className="flex-1">
-                <div className="text-[10px] uppercase tracking-[0.35em] text-violet-deep mb-3 sm:mb-4">
+                <div className="text-[10px] uppercase tracking-[0.35em] text-violet-deep mb-3 sm:mb-4 transition-transform duration-300 group-hover:translate-x-1">
                   {article.category}
                 </div>
-                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-ink max-w-3xl leading-snug text-balance">
+                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-ink max-w-3xl leading-snug text-balance transition-colors duration-300 group-hover:text-violet-deep">
                   {article.title}
                 </h2>
               </div>
@@ -151,7 +154,7 @@ function Insights() {
                   Coming Soon
                 </span>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </main>

@@ -57,14 +57,34 @@ export function WhyDiu() {
           {points.map((p, i) => (
             <motion.div
               key={p.title}
-              initial={{ opacity: 0, x: i % 2 === 0 ? -24 : 24 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ delay: i * 0.06, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-ivory p-8 sm:p-10 md:p-16 hover:bg-white transition-colors duration-500"
+              transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="group relative bg-ivory p-8 sm:p-10 md:p-16 hover:bg-white transition-all duration-700 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(75,42,143,0.08)] overflow-hidden"
             >
-              <div className="font-display text-2xl sm:text-3xl mb-4 sm:mb-6">{p.title}</div>
-              <p className="text-ink/65 leading-relaxed text-sm sm:text-[15px]">{p.desc}</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-deep/0 via-violet-deep/5 to-violet-deep/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-violet-deep/30 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none" />
+              <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-violet-deep/10 to-transparent scale-y-0 group-hover:scale-y-100 transition-transform duration-700 delay-100 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none" />
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="font-display text-2xl sm:text-3xl mb-4 sm:mb-6 relative z-10"
+              >
+                {p.title}
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="text-ink/65 leading-relaxed text-sm sm:text-[15px] relative z-10"
+              >
+                {p.desc}
+              </motion.p>
             </motion.div>
           ))}
         </div>

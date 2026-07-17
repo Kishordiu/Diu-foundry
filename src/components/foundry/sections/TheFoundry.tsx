@@ -65,27 +65,38 @@ function FoundryCard({
 }) {
   return (
     <motion.article
-      initial={{ opacity: 0, filter: "blur(8px)", y: 40 }}
-      whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className={`group col-span-12 md:col-span-4 ${className}`}
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] premium-shadow">
-        <img
+        <motion.img
           src={img}
           alt=""
           loading="lazy"
+          initial={{ scale: 1.15, filter: "blur(10px)" }}
+          whileInView={{ scale: 1, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="h-full w-full object-cover transition-[transform,filter] duration-[1200ms] ease-out group-hover:scale-105 group-hover:brightness-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent pointer-events-none" />
         <div className="absolute left-6 top-6 flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-ivory">
           <span className="font-display text-2xl italic">{step}</span>
           <span className="h-px w-8 bg-ivory/60" />
         </div>
       </div>
-      <h3 className="mt-6 font-display text-3xl">{title}</h3>
-      <p className="mt-3 text-sm leading-relaxed text-ink/65">{copy}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <h3 className="mt-6 font-display text-3xl">{title}</h3>
+        <p className="mt-3 text-sm leading-relaxed text-ink/65">{copy}</p>
+      </motion.div>
     </motion.article>
   );
 }

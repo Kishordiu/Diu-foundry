@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Mark } from "../Mark";
 import circuit from "@/assets/circuit.jpg";
 import { Link } from "@tanstack/react-router";
@@ -6,7 +7,13 @@ export function Connect() {
   return (
     <section id="connect" className="relative overflow-hidden grad-violet-ink text-ivory">
       <div className="mx-auto grid max-w-[1500px] grid-cols-12 gap-12 sm:gap-6 px-4 sm:px-6 py-20 lg:py-32 xl:py-48 md:px-12">
-        <div className="col-span-12 md:col-span-6 z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          className="col-span-12 md:col-span-6 z-10"
+        >
           <div className="flex items-center gap-4 text-[9px] sm:text-[10px] uppercase tracking-[0.5em] text-ivory/50">
             <Mark className="h-5 w-5 sm:h-6 sm:w-6" stroke="#fff" />
             <span>Chapter X · Connect</span>
@@ -87,9 +94,15 @@ export function Connect() {
               Instagram
             </a>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="col-span-12 md:col-span-5 md:col-start-8 z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ delay: 0.2, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          className="col-span-12 md:col-span-5 md:col-start-8 z-10"
+        >
           <div className="rounded-[2rem] border border-ivory/15 bg-white/[0.04] p-6 sm:p-8 backdrop-blur-xl md:p-10 flex flex-col items-center justify-center text-center">
             <h3 className="font-display text-2xl sm:text-3xl mb-3 sm:mb-4">Start your project</h3>
             <p className="text-ivory/70 mb-6 sm:mb-8 text-xs sm:text-sm text-balance">
@@ -106,7 +119,7 @@ export function Connect() {
               </span>
             </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Circuit macro art — decorative only */}

@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Nav } from "@/components/foundry/Nav";
 import { Footer } from "@/components/foundry/sections/Footer";
 import { Mark } from "@/components/foundry/Mark";
 import lab from "@/assets/lab.jpg";
@@ -90,7 +89,6 @@ function WorkDetail() {
 
   return (
     <div className="min-h-screen bg-ivory text-ink pt-32">
-      <Nav />
 
       {/* Hero */}
       <header className="mx-auto max-w-[1500px] px-6 py-12 md:px-12 md:py-24">

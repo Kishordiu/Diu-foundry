@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Nav } from "@/components/foundry/Nav";
 import { Footer } from "@/components/foundry/sections/Footer";
 import { Mark } from "@/components/foundry/Mark";
 import robotics from "@/assets/robotics.png";
@@ -64,7 +63,6 @@ const works = [
 function Works() {
   return (
     <div className="min-h-screen bg-ivory text-ink pt-24 sm:pt-32">
-      <Nav />
       <main className="mx-auto max-w-[1500px] px-4 sm:px-6 py-8 sm:py-12 md:px-12">
         <div className="flex flex-col items-start gap-4">
           <div className="flex items-center gap-3 sm:gap-4 text-[9px] sm:text-[10px] uppercase tracking-[0.5em] text-ink/50">
@@ -97,8 +95,8 @@ function Work({ work, index }: { work: (typeof works)[number]; index: number }) 
     <article className="grid grid-cols-12 gap-6 sm:gap-8 items-center">
       <div className={`col-span-12 md:col-span-7 ${reverse ? "md:order-2 md:col-start-6" : ""}`}>
         <motion.div
-          initial={{ clipPath: "inset(0 100% 0 0)" }}
-          whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+          initial={{ clipPath: "inset(0 100% 0 0)", filter: "blur(10px)" }}
+          whileInView={{ clipPath: "inset(0 0% 0 0)", filter: "blur(0px)" }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         >
@@ -126,8 +124,8 @@ function Work({ work, index }: { work: (typeof works)[number]; index: number }) 
         className={`col-span-12 flex flex-col justify-center md:col-span-4 ${reverse ? "md:order-1 md:col-start-1" : "md:col-start-9"}`}
       >
         <motion.div
-          initial={{ opacity: 0, x: reverse ? -20 : 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, x: reverse ? -20 : 20, filter: "blur(5px)" }}
+          whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >

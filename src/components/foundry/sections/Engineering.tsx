@@ -60,17 +60,21 @@ export function Engineering() {
           {disciplines.map((d, i) => (
             <motion.div
               key={d.n}
-              initial={{ opacity: 0, filter: "blur(6px)", y: 20 }}
+              initial={{ opacity: 0, filter: "blur(8px)", y: 30 }}
               whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: (i % 4) * 0.06, duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-              className="group col-span-12 p-6 sm:p-8 md:col-span-6 lg:col-span-3 transition-all duration-500 hover:bg-white hover:premium-shadow rounded-[2rem] border border-transparent hover:border-ink/5"
+              transition={{ delay: (i % 4) * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="group relative col-span-12 p-6 sm:p-8 md:col-span-6 lg:col-span-3 transition-all duration-700 hover:bg-white hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(75,42,143,0.08)] rounded-[2rem] border border-transparent hover:border-ink/5 overflow-hidden"
             >
-              <div className="font-display text-xs italic text-violet-deep/70">{d.n}</div>
-              <h3 className="mt-4 font-display text-xl sm:text-2xl group-hover:text-violet-deep transition-colors">
-                {d.t}
-              </h3>
-              <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-relaxed text-ink/65">{d.d}</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-deep/0 via-violet-deep/5 to-violet-deep/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2rem]" />
+              
+              <div className="relative z-10">
+                <div className="font-display text-xs italic text-violet-deep/70">{d.n}</div>
+                <h3 className="mt-4 font-display text-xl sm:text-2xl group-hover:text-violet-deep transition-colors">
+                  {d.t}
+                </h3>
+                <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-relaxed text-ink/65">{d.d}</p>
+              </div>
             </motion.div>
           ))}
         </div>

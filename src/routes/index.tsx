@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader } from "@/components/foundry/Loader";
-import { Nav } from "@/components/foundry/Nav";
 import { SmoothScroll } from "@/components/foundry/SmoothScroll";
 import { Cursor } from "@/components/foundry/Cursor";
 import { Hero } from "@/components/foundry/sections/Hero";
@@ -27,7 +26,6 @@ function Foundry() {
       <Loader />
       <SmoothScroll />
       <Cursor />
-      <Nav />
       <Hero />
       <TheSpark />
       <Audiences />

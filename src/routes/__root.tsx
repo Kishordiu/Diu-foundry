@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
 import { PageTransition } from "@/components/foundry/PageTransition";
 import { CursorTrail } from "@/components/foundry/CursorTrail";
+import { Nav } from "@/components/foundry/Nav";
 
 function NotFoundComponent() {
   return (
@@ -82,6 +83,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {/* Nav is outside PageTransition intentionally — the mobile overlay must never
+          inherit opacity:0 or filter:blur from the page transition animation */}
+      <Nav />
       <CursorTrail />
       <PageTransition>
         <Outlet />
