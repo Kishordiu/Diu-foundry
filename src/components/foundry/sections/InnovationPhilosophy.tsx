@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import spark from "@/assets/spark_v2.png";
+import spark from "@/assets/spark_v2.webp";
 
 export function InnovationPhilosophy() {
   const ref = useRef<HTMLDivElement>(null);
@@ -15,6 +15,7 @@ export function InnovationPhilosophy() {
           src={spark}
           alt="A single spark igniting"
           loading="lazy"
+          decoding="async"
           className="h-[120%] w-full object-cover opacity-80 mix-blend-screen"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-ink via-transparent to-ink opacity-90" />

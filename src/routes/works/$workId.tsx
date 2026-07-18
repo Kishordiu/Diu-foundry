@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Footer } from "@/components/foundry/sections/Footer";
 import { Mark } from "@/components/foundry/Mark";
-import lab from "@/assets/lab.jpg";
-import server from "@/assets/server.jpg";
-import studio from "@/assets/studio.jpg";
+import lab from "@/assets/lab.webp";
+import server from "@/assets/server.webp";
+import studio from "@/assets/studio.webp";
 
 export const Route = createFileRoute("/works/$workId")({
   head: ({ params }) => {

@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Mark, ArcDivider } from "../Mark";
-import robotics from "@/assets/robotics.png";
-import cloud from "@/assets/cloud.png";
-import warroom from "@/assets/warroom.png";
+import robotics from "@/assets/robotics.webp";
+import cloud from "@/assets/cloud.webp";
+import warroom from "@/assets/warroom.webp";
 
 export function TheFoundry() {
   return (
@@ -76,11 +76,12 @@ function FoundryCard({
           src={img}
           alt=""
           loading="lazy"
-          initial={{ scale: 1.15, filter: "blur(10px)" }}
-          whileInView={{ scale: 1, filter: "blur(0px)" }}
+          decoding="async"
+          initial={{ scale: 1.15 }}
+          whileInView={{ scale: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="h-full w-full object-cover transition-[transform,filter] duration-[1200ms] ease-out group-hover:scale-105 group-hover:brightness-105"
+          className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105 group-hover:brightness-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent pointer-events-none" />
         <div className="absolute left-6 top-6 flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-ivory">

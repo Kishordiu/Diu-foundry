@@ -57,6 +57,13 @@ export function CursorTrail() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Accessibility + mobile: disable entirely on touch devices.
+    // Matches the same guard in Cursor.tsx — touch screens have no mouse cursor.
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (prefersReducedMotion || isTouch) return;
+
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 

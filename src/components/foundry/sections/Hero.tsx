@@ -9,13 +9,16 @@ export function Hero() {
   const sy = useSpring(my, { stiffness: 60, damping: 20 });
 
   useEffect(() => {
+    // Skip expensive parallax on touch/mobile — no mouse to track
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouch) return;
     const onMove = (e: MouseEvent) => {
       const nx = (e.clientX / window.innerWidth - 0.5) * 20;
       const ny = (e.clientY / window.innerHeight - 0.5) * 20;
       mx.set(nx);
       my.set(ny);
     };
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
   }, [mx, my]);
 
@@ -64,8 +67,8 @@ export function Hero() {
 
         <div className="col-span-12 mt-10 sm:mt-14 grid grid-cols-12 gap-6">
           <motion.p
-            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-12 max-w-lg text-sm sm:text-[15px] leading-relaxed text-ink/70 md:col-span-5 md:col-start-1"
           >
@@ -74,8 +77,8 @@ export function Hero() {
             intelligent products.
           </motion.p>
           <motion.div
-            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.9, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-12 flex flex-wrap items-center gap-4 md:col-span-6 md:col-start-7 md:justify-end"
           >
@@ -117,10 +120,12 @@ function BreathingGrain() {
 
 function RevealLine({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
-    <span className="block relative">
+    <span className="block relative overflow-hidden">
       <motion.span
-        initial={{ y: "100%", clipPath: "inset(0 0 100% 0)", filter: "blur(8px)" }}
-        animate={{ y: 0, clipPath: "inset(-20% 0 -20% 0)", filter: "blur(0px)" }}
+        // Removed filter:blur — blur on the LCP element blocks Lighthouse LCP metric.
+        // clipPath + y alone produce an equally premium masked reveal at zero GPU cost.
+        initial={{ y: "110%", clipPath: "inset(0 0 100% 0)" }}
+        animate={{ y: 0, clipPath: "inset(-20% 0 -20% 0)" }}
         transition={{ delay, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         className="block"
       >

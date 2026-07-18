@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Footer } from "@/components/foundry/sections/Footer";
 import { Mark } from "@/components/foundry/Mark";
-import robotics from "@/assets/robotics.png";
-import cloud from "@/assets/cloud.png";
-import warroom from "@/assets/warroom.png";
+import robotics from "@/assets/robotics.webp";
+import cloud from "@/assets/cloud.webp";
+import warroom from "@/assets/warroom.webp";
 
 export const Route = createFileRoute("/works/")({
   head: () => ({

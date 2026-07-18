@@ -61,7 +61,7 @@ Launching soon.
 📧 diufoundry@gmail.com
 
 Instagram:
-https://instagram.com/diufoundryofficial
+https://instagram.com/diufoundry
 
 LinkedIn:
 https://www.linkedin.com/company/diufoundary/

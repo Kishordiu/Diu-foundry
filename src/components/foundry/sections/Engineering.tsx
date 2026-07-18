@@ -60,8 +60,8 @@ export function Engineering() {
           {disciplines.map((d, i) => (
             <motion.div
               key={d.n}
-              initial={{ opacity: 0, filter: "blur(8px)", y: 30 }}
-              whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: (i % 4) * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="group relative col-span-12 p-6 sm:p-8 md:col-span-6 lg:col-span-3 transition-all duration-700 hover:bg-white hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(75,42,143,0.08)] rounded-[2rem] border border-transparent hover:border-ink/5 overflow-hidden"

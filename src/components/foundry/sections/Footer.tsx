@@ -63,7 +63,7 @@ export function Footer() {
               </svg>
             </a>
             <a
-              href="https://instagram.com/diufoundryofficial"
+              href="https://instagram.com/diufoundry"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit DIU Foundry on Instagram"
@@ -213,7 +213,7 @@ export function Footer() {
             </li>
             <li>
               <a
-                href="https://instagram.com/diufoundryofficial"
+                href="https://instagram.com/diufoundry"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-ivory transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep rounded"

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Mark } from "../Mark";
-import circuit from "@/assets/circuit.jpg";
+import circuit from "@/assets/circuit.webp";
 import { Link } from "@tanstack/react-router";
 
 export function Connect() {
@@ -76,7 +76,7 @@ export function Connect() {
             </a>
             <span className="h-3 w-px bg-ivory/20" aria-hidden="true" />
             <a
-              href="https://instagram.com/diufoundryofficial"
+              href="https://instagram.com/diufoundry"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="DIU Foundry on Instagram"
@@ -127,7 +127,7 @@ export function Connect() {
         className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] opacity-30 mix-blend-screen overflow-hidden"
         aria-hidden="true"
       >
-        <img src={circuit} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <img src={circuit} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </div>
     </section>
   );

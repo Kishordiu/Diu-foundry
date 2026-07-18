@@ -254,12 +254,28 @@
   border: 1px solid color-mix(in oklab, white 20%, transparent);
   box-shadow: 0 30px 80px -30px color-mix(in oklab, #4b2a8f 15%, transparent);
 }
+/* On touch/mobile, skip the expensive backdrop-filter */
+@media (pointer: coarse) {
+  .glass-panel {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: color-mix(in oklab, white 85%, transparent);
+  }
+}
 @utility glass-panel-dark {
   background: color-mix(in oklab, black 30%, transparent);
   -webkit-backdrop-filter: blur(24px) saturate(110%);
   backdrop-filter: blur(24px) saturate(110%);
   border: 1px solid color-mix(in oklab, white 10%, transparent);
   box-shadow: 0 30px 80px -30px color-mix(in oklab, black 60%, transparent);
+}
+/* On touch/mobile, skip the expensive backdrop-filter */
+@media (pointer: coarse) {
+  .glass-panel-dark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: color-mix(in oklab, black 60%, transparent);
+  }
 }
 @utility premium-shadow {
   box-shadow:

@@ -1,0 +1,28 @@
+# DIU Foundry
+
+> DIU Foundry is a technology studio engineering custom AI systems, intelligent software, embedded systems, IoT ecosystems, and premium digital products.
+
+DIU Foundry partners with startups, enterprises, and researchers to build intelligent products. Every idea is a spark. Build the flame.
+
+## Services
+
+- Artificial Intelligence & Machine Learning — custom models, agents, and pipelines
+- Modern Web Applications — React, Next.js, TypeScript, TanStack
+- Mobile Applications — native and cross-platform
+- Embedded Systems & IoT — firmware, ESP32, Raspberry Pi, FreeRTOS
+- Cloud Infrastructure — AWS, Vercel, edge infrastructure
+- Cybersecurity — threat modelling, hardening, audits
+- APIs & Backend — Node.js, Python, Rust, Go, PostgreSQL
+- DevOps & Infrastructure — Docker, Kubernetes, Terraform, GitHub Actions
+
+## Contact
+
+- Email: diufoundry@gmail.com
+- GitHub: https://github.com/Kishordiu
+- LinkedIn: https://www.linkedin.com/company/diufoundary/
+- Instagram: https://instagram.com/diufoundry
+
+## Optional
+
+- [Sitemap](https://diufoundry.com/sitemap.xml)
+- [Project Intake Form](https://diufoundry.com/forge)

@@ -1,4 +1,4 @@
-import logoSrc from "@/assets/diu-logo.png";
+import logoSrc from "@/assets/diu-logo.webp";
 
 // The official DIU Foundry brand mark.
 // `tone="light"` renders the white artwork as-is (for dark backgrounds).

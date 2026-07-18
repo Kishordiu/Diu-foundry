@@ -5,8 +5,8 @@ import { Mark } from "./Mark";
 export function Loader() {
   const [done, setDone] = useState(false);
   useEffect(() => {
-    // Total duration ~1.6s for the sequence to feel like rapid ignition
-    const t = setTimeout(() => setDone(true), 1600);
+    // Reduced from 1600ms — shaves 400ms off FCP on mobile
+    const t = setTimeout(() => setDone(true), 1200);
     return () => clearTimeout(t);
   }, []);
 
@@ -16,8 +16,8 @@ export function Loader() {
         <motion.div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#000000] overflow-hidden"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, backdropFilter: "blur(30px)" }}
-          transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.65, 0, 0.35, 1] }}
         >
           <div className="relative flex flex-col items-center justify-center h-full w-full">
             {/* 1. Pure black screen starts implicitly */}
@@ -64,10 +64,9 @@ export function Loader() {
               initial={{
                 opacity: 0,
                 scale: 0.95,
-                filter: "blur(20px) contrast(200%) brightness(0.5)",
               }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px) contrast(100%) brightness(1)" }}
-              transition={{ delay: 0.3, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="relative z-10 flex flex-col items-center"
             >
               <div className="relative overflow-hidden group">
@@ -93,16 +92,16 @@ export function Loader() {
             {/* 7. Tagline Appearance */}
             <div className="absolute top-[60%] flex flex-col items-center justify-center text-center">
               <motion.div
-                initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
                 className="font-display text-2xl italic tracking-wider text-[#f2edff]"
               >
                 Every Idea is a Spark.
               </motion.div>
               <motion.div
-                initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.0, duration: 0.7, ease: "easeOut" }}
                 className="mt-3 text-[10px] uppercase tracking-[0.5em] text-white/60"
               >

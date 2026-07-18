@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import spark from "@/assets/spark.jpg";
+import spark from "@/assets/spark.webp";
 
 export function TheSpark() {
   const ref = useRef<HTMLDivElement>(null);
@@ -15,6 +15,8 @@ export function TheSpark() {
         <img
           src={spark}
           alt="A single spark igniting"
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover opacity-70"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-ink via-transparent to-ink" />

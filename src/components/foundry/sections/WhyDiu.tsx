@@ -57,8 +57,8 @@ export function WhyDiu() {
           {points.map((p, i) => (
             <motion.div
               key={p.title}
-              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="group relative bg-ivory p-8 sm:p-10 md:p-16 hover:bg-white transition-all duration-700 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(75,42,143,0.08)] overflow-hidden"

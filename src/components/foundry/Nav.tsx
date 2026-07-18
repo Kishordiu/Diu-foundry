@@ -176,8 +176,8 @@ export function Nav() {
               {mobileLinks.map((l, i) => (
                 <motion.div
                   key={l.label}
-                  initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{
                     delay: 0.1 + i * 0.04,
                     duration: 0.4,
@@ -197,8 +197,8 @@ export function Nav() {
               ))}
 
               <motion.div
-                initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: 0.1 + mobileLinks.length * 0.04,
                   duration: 0.4,
