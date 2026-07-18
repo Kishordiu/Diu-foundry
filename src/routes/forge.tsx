@@ -96,15 +96,60 @@ function Forge() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorDetail, setErrorDetail] = useState("");
   const [data, setData] = useState<FormData>(initialData);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const totalSteps = 4;
 
-  const update = (field: keyof FormData, value: string) =>
+  const update = (field: keyof FormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, totalSteps));
+  const validateStep = (currentStep: number) => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+
+    if (currentStep === 1) {
+      if (!data.name.trim()) newErrors.name = "Name is required";
+      if (!data.email.trim()) newErrors.email = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) newErrors.email = "Please enter a valid email";
+      if (!data.country.trim()) newErrors.country = "Country is required";
+      if (!data.visitorType.trim()) newErrors.visitorType = "Role is required";
+    } else if (currentStep === 2) {
+      if (!data.projectCategory.trim()) newErrors.projectCategory = "Project type is required";
+      if (!data.timeline.trim()) newErrors.timeline = "Timeline is required";
+      if (data.budgetCurrency !== "OTHER" && !data.budgetAmount.trim()) {
+        newErrors.budgetAmount = "Budget amount is required";
+      }
+    } else if (currentStep === 3) {
+      if (!data.challenges.trim()) newErrors.challenges = "Project description is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
+  };
+
+  const nextStep = () => {
+    if (validateStep(step)) {
+      setStep((s) => Math.min(s + 1, totalSteps));
+    }
+  };
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = async () => {
+    if (!validateStep(4)) return;
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
+      if (!validateStep(1)) setStep(1);
+      else if (!validateStep(2)) setStep(2);
+      else if (!validateStep(3)) setStep(3);
+      return;
+    }
+
     // Guard: if the key was never set, surface that clearly — never fake success
     if (!WEB3FORMS_KEY || WEB3FORMS_KEY === "PASTE_YOUR_KEY_HERE") {
       setStatus("not_configured");
@@ -113,35 +158,47 @@ function Forge() {
 
     setStatus("loading");
 
-    const budgetLabel = data.budgetAmount
-      ? `${data.budgetCurrency} ${data.budgetAmount}`
-      : data.budgetCurrency === "OTHER"
-        ? "Undecided / Other"
-        : "Not specified";
-
-    const payload = {
+    const payload: Record<string, any> = {
       // Web3Forms required fields
       access_key: WEB3FORMS_KEY,
-      subject: `New project inquiry from ${data.name || "a visitor"} — DIU Foundry`,
-      from_name: data.name || "DIU Foundry Form",
-      replyto: data.email,
-
-      // Submission content — all fields included
-      Name: data.name,
-      Email: data.email,
-      Country: data.country,
-      Organization: data.organization || "Not provided",
-      Role: data.visitorType,
-      "Project Title": data.projectCategory,
-      "Project Description": data.challenges || "Not provided",
-      Budget: budgetLabel,
-      Timeline: data.timeline,
-      "Additional Notes": data.notes || "None",
-      "Submission Time": new Date().toISOString(),
+      subject: `New project inquiry from ${data.name.trim()} — DIU Foundry`,
+      from_name: data.name.trim(),
+      replyto: data.email.trim(),
 
       // Web3Forms options
       botcheck: false, // honeypot field — must be false
+
+      // Required Submission content
+      Name: data.name.trim(),
+      Email: data.email.trim(),
+      Country: data.country.trim(),
+      Role: data.visitorType.trim(),
+      "Project Title": data.projectCategory.trim(),
+      "Project Description": data.challenges.trim(),
+      Timeline: data.timeline.trim(),
     };
+
+    if (data.organization.trim()) {
+      payload.Organization = data.organization.trim();
+    }
+
+    if (data.budgetCurrency !== "OTHER" && data.budgetAmount.trim()) {
+      payload.Budget = `${data.budgetCurrency} ${data.budgetAmount.trim()}`;
+    }
+
+    if (data.goals.trim()) {
+      payload["Goals & Success"] = data.goals.trim();
+    }
+
+    if (data.notes.trim()) {
+      payload["Additional Notes"] = data.notes.trim();
+    }
+
+    if (data.contactMethod.trim()) {
+      payload["Preferred Contact"] = data.contactMethod.trim();
+    }
+
+    payload["Submission Time"] = new Date().toISOString();
 
     if (import.meta.env.DEV) {
       console.group("[DIU Forge] Submitting to Web3Forms");
@@ -269,11 +326,12 @@ function Forge() {
               {/* Wizard panel */}
               <div className="rounded-2xl sm:rounded-[2rem] border border-ivory/10 bg-white/[0.03] p-6 sm:p-8 md:p-12 backdrop-blur-xl min-h-[460px]">
                 <AnimatePresence mode="wait">
-                  {step === 1 && <StepOne key="1" data={data} update={update} onNext={nextStep} />}
+                  {step === 1 && <StepOne key="1" data={data} errors={errors} update={update} onNext={nextStep} />}
                   {step === 2 && (
                     <StepTwo
                       key="2"
                       data={data}
+                      errors={errors}
                       update={update}
                       onNext={nextStep}
                       onPrev={prevStep}
@@ -283,6 +341,7 @@ function Forge() {
                     <StepThree
                       key="3"
                       data={data}
+                      errors={errors}
                       update={update}
                       onNext={nextStep}
                       onPrev={prevStep}
@@ -292,6 +351,7 @@ function Forge() {
                     <StepFour
                       key="4"
                       data={data}
+                      errors={errors}
                       update={update}
                       onPrev={prevStep}
                       onSubmit={handleSubmit}
@@ -422,10 +482,12 @@ function NotConfiguredScreen() {
 
 function StepOne({
   data,
+  errors,
   update,
   onNext,
 }: {
   data: FormData;
+  errors: Partial<Record<keyof FormData, string>>;
   update: (f: keyof FormData, v: string) => void;
   onNext: () => void;
 }) {
@@ -449,6 +511,7 @@ function StepOne({
             type="text"
             placeholder="Your name"
             value={data.name}
+            error={errors.name}
             onChange={(v) => update("name", v)}
           />
           <Input
@@ -458,6 +521,7 @@ function StepOne({
             placeholder="you@company.com"
             autocomplete="email"
             value={data.email}
+            error={errors.email}
             onChange={(v) => update("email", v)}
           />
         </div>
@@ -466,9 +530,10 @@ function StepOne({
             id="organization"
             label="Organization"
             type="text"
-            placeholder="Company or university"
+            placeholder="Company or university (optional)"
             autocomplete="organization"
             value={data.organization}
+            error={errors.organization}
             onChange={(v) => update("organization", v)}
           />
           <Input
@@ -478,6 +543,7 @@ function StepOne({
             placeholder="Your country"
             autocomplete="country-name"
             value={data.country}
+            error={errors.country}
             onChange={(v) => update("country", v)}
           />
         </div>
@@ -494,14 +560,16 @@ function StepOne({
               "Other",
             ]}
             value={data.visitorType}
+            error={errors.visitorType}
             onChange={(v) => update("visitorType", v)}
           />
           <Input
             id="industry"
             label="Industry / Domain"
             type="text"
-            placeholder="e.g. Healthcare, Finance"
+            placeholder="e.g. Healthcare, Finance (optional)"
             value={data.industry}
+            error={errors.industry}
             onChange={(v) => update("industry", v)}
           />
         </div>
@@ -518,11 +586,13 @@ function StepOne({
 
 function StepTwo({
   data,
+  errors,
   update,
   onNext,
   onPrev,
 }: {
   data: FormData;
+  errors: Partial<Record<keyof FormData, string>>;
   update: (f: keyof FormData, v: string) => void;
   onNext: () => void;
   onPrev: () => void;
@@ -556,6 +626,7 @@ function StepTwo({
             "Other",
           ]}
           value={data.projectCategory}
+          error={errors.projectCategory}
           onChange={(v) => update("projectCategory", v)}
         />
         <Select
@@ -570,12 +641,13 @@ function StepTwo({
             "Flexible / Undecided",
           ]}
           value={data.timeline}
+          error={errors.timeline}
           onChange={(v) => update("timeline", v)}
         />
 
         {/* International budget field */}
         <div>
-          <label className="text-[10px] uppercase tracking-[0.2em] text-ivory/50 block mb-3">
+          <label className={`text-[10px] uppercase tracking-[0.2em] block mb-3 ${errors.budgetAmount ? 'text-red-400' : 'text-ivory/50'}`}>
             Estimated Budget
           </label>
           <div className="flex gap-3 items-end">
@@ -604,15 +676,19 @@ function StepTwo({
                   placeholder="e.g. 15,000"
                   value={data.budgetAmount}
                   onChange={(e) => update("budgetAmount", e.target.value)}
-                  className="flex-1 bg-transparent border-b border-ivory/20 py-3 outline-none focus:border-violet-deep transition-colors text-ivory placeholder:text-ivory/20 text-sm"
+                  className={`flex-1 bg-transparent border-b py-3 outline-none transition-colors text-ivory placeholder:text-ivory/20 text-sm ${errors.budgetAmount ? 'border-red-500/50 focus:border-red-500' : 'border-ivory/20 focus:border-violet-deep'}`}
                   aria-label="Budget amount"
                 />
               </div>
             )}
           </div>
-          <p className="mt-2 text-[10px] text-ivory/25">
-            Enter any amount in your local currency. Exact figures are not required.
-          </p>
+          {errors.budgetAmount ? (
+            <p className="mt-2 text-[11px] text-red-400">{errors.budgetAmount}</p>
+          ) : (
+            <p className="mt-2 text-[10px] text-ivory/25">
+              Enter any amount in your local currency. Exact figures are not required.
+            </p>
+          )}
         </div>
       </div>
 
@@ -630,11 +706,13 @@ function StepTwo({
 
 function StepThree({
   data,
+  errors,
   update,
   onNext,
   onPrev,
 }: {
   data: FormData;
+  errors: Partial<Record<keyof FormData, string>>;
   update: (f: keyof FormData, v: string) => void;
   onNext: () => void;
   onPrev: () => void;
@@ -657,13 +735,15 @@ function StepThree({
           label="What problem are you solving?"
           placeholder="Describe the core challenge or pain point driving this project."
           value={data.challenges}
+          error={errors.challenges}
           onChange={(v) => update("challenges", v)}
         />
         <Textarea
           id="goals"
           label="What does success look like?"
-          placeholder="Describe the intended outcome — what will be different when this is done?"
+          placeholder="Describe the intended outcome (optional)"
           value={data.goals}
+          error={errors.goals}
           onChange={(v) => update("goals", v)}
         />
       </div>
@@ -682,12 +762,14 @@ function StepThree({
 
 function StepFour({
   data,
+  errors,
   update,
   onPrev,
   onSubmit,
   isLoading,
 }: {
   data: FormData;
+  errors: Partial<Record<keyof FormData, string>>;
   update: (f: keyof FormData, v: string) => void;
   onPrev: () => void;
   onSubmit: () => void;
@@ -711,13 +793,15 @@ function StepFour({
           label="Additional context (optional)"
           placeholder="References, links, constraints, or anything else that would help us."
           value={data.notes}
+          error={errors.notes}
           onChange={(v) => update("notes", v)}
         />
         <Select
           id="contact-method"
-          label="Preferred contact method"
+          label="Preferred contact method (optional)"
           options={["Email", "Video Call", "Voice Call"]}
           value={data.contactMethod}
+          error={errors.contactMethod}
           onChange={(v) => update("contactMethod", v)}
         />
       </div>
@@ -770,6 +854,7 @@ function Input({
   autocomplete,
   value,
   onChange,
+  error,
 }: {
   id: string;
   label: string;
@@ -778,12 +863,13 @@ function Input({
   autocomplete?: string;
   value: string;
   onChange: (v: string) => void;
+  error?: string;
 }) {
   return (
     <div className="group relative">
       <label
         htmlFor={id}
-        className="text-[10px] uppercase tracking-[0.2em] text-ivory/40 block mb-1.5 transition-colors group-focus-within:text-violet-deep/80"
+        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? 'text-red-400' : 'text-ivory/40 group-focus-within:text-violet-deep/80'}`}
       >
         {label}
       </label>
@@ -794,8 +880,9 @@ function Input({
         autoComplete={autocomplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/[0.02] border border-ivory/10 rounded-lg px-4 py-3.5 outline-none focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10 transition-all duration-300 text-ivory text-sm placeholder:text-ivory/20 shadow-sm"
+        className={`w-full bg-white/[0.02] border rounded-lg px-4 py-3.5 outline-none transition-all duration-300 text-ivory text-sm placeholder:text-ivory/20 shadow-sm ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-ivory/10 focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10'}`}
       />
+      {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
     </div>
   );
 }
@@ -806,18 +893,20 @@ function Select({
   options,
   value,
   onChange,
+  error,
 }: {
   id: string;
   label: string;
   options: string[];
   value: string;
   onChange: (v: string) => void;
+  error?: string;
 }) {
   return (
     <div className="group relative">
       <label
         htmlFor={id}
-        className="text-[10px] uppercase tracking-[0.2em] text-ivory/40 block mb-1.5 transition-colors group-focus-within:text-violet-deep/80"
+        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? 'text-red-400' : 'text-ivory/40 group-focus-within:text-violet-deep/80'}`}
       >
         {label}
       </label>
@@ -825,7 +914,7 @@ function Select({
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/[0.02] border border-ivory/10 rounded-lg px-4 py-3.5 outline-none focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10 transition-all duration-300 text-ivory text-sm appearance-none cursor-pointer shadow-sm"
+        className={`w-full bg-white/[0.02] border rounded-lg px-4 py-3.5 outline-none transition-all duration-300 text-ivory text-sm appearance-none cursor-pointer shadow-sm ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-ivory/10 focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10'}`}
       >
         <option value="" disabled className="bg-ink text-ivory/40">
           Select…
@@ -836,6 +925,7 @@ function Select({
           </option>
         ))}
       </select>
+      {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
     </div>
   );
 }
@@ -846,18 +936,20 @@ function Textarea({
   placeholder,
   value,
   onChange,
+  error,
 }: {
   id: string;
   label: string;
   placeholder?: string;
   value: string;
   onChange: (v: string) => void;
+  error?: string;
 }) {
   return (
     <div className="group relative">
       <label
         htmlFor={id}
-        className="text-[10px] uppercase tracking-[0.2em] text-ivory/40 block mb-1.5 transition-colors group-focus-within:text-violet-deep/80"
+        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? 'text-red-400' : 'text-ivory/40 group-focus-within:text-violet-deep/80'}`}
       >
         {label}
       </label>
@@ -867,8 +959,9 @@ function Textarea({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/[0.02] border border-ivory/10 rounded-lg px-4 py-3.5 outline-none focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10 transition-all duration-300 text-ivory text-sm placeholder:text-ivory/20 resize-none shadow-sm"
+        className={`w-full bg-white/[0.02] border rounded-lg px-4 py-3.5 outline-none transition-all duration-300 text-ivory text-sm placeholder:text-ivory/20 resize-none shadow-sm ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-ivory/10 focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10'}`}
       />
+      {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
     </div>
   );
 }
@@ -889,11 +982,10 @@ function Button({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`relative overflow-hidden px-8 py-3.5 rounded-full text-[11px] uppercase tracking-[0.2em] transition-all duration-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep disabled:opacity-40 disabled:cursor-not-allowed group ${
-        secondary
+      className={`relative overflow-hidden px-8 py-3.5 rounded-full text-[11px] uppercase tracking-[0.2em] transition-all duration-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep disabled:opacity-40 disabled:cursor-not-allowed group ${secondary
           ? "border border-ivory/15 text-ivory/70 hover:border-ivory/40 hover:text-ivory bg-transparent"
           : "bg-ivory text-ink hover:bg-[#e7d9ff] shadow-sm hover:shadow"
-      }`}
+        }`}
     >
       {!secondary && !disabled && (
         <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[sweep_1.5s_ease-in-out_infinite]" />
