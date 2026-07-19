@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+// ─── Particle ─────────────────────────────────────────────────────────────────
 class Particle {
   x: number;
   y: number;
@@ -13,22 +14,19 @@ class Particle {
   constructor(x: number, y: number, isTouch: boolean) {
     this.x = x;
     this.y = y;
-    // Slight random velocity for a "shimmer" effect
     const angle = Math.random() * Math.PI * 2;
-    const speed = isTouch ? Math.random() * 2 + 1 : Math.random() * 1.5 + 0.5;
+    const speed = isTouch ? Math.random() * 2.5 + 1.5 : Math.random() * 1.5 + 0.5;
     this.vx = Math.cos(angle) * speed;
     this.vy = Math.sin(angle) * speed;
-
-    // Touch particles live slightly shorter but start bigger
-    this.maxLife = isTouch ? Math.random() * 20 + 20 : Math.random() * 30 + 30;
+    // Touch particles are slightly larger and live a bit shorter for a punchy trail
+    this.maxLife = isTouch ? Math.random() * 18 + 16 : Math.random() * 30 + 30;
     this.life = this.maxLife;
-    this.size = isTouch ? Math.random() * 3 + 2 : Math.random() * 2 + 1;
-
+    this.size = isTouch ? Math.random() * 4 + 2.5 : Math.random() * 2 + 1;
     // Violet / Lavender / Pearlescent hues
     const hues = [260, 270, 280, 290];
     const h = hues[Math.floor(Math.random() * hues.length)];
-    const s = Math.floor(Math.random() * 30 + 70); // 70-100%
-    const l = Math.floor(Math.random() * 30 + 60); // 60-90%
+    const s = Math.floor(Math.random() * 30 + 70);
+    const l = Math.floor(Math.random() * 30 + 60);
     this.color = `hsl(${h}, ${s}%, ${l}%)`;
   }
 
@@ -36,9 +34,8 @@ class Particle {
     this.x += this.vx;
     this.y += this.vy;
     this.life--;
-    // Slight drag
-    this.vx *= 0.95;
-    this.vy *= 0.95;
+    this.vx *= 0.93;
+    this.vy *= 0.93;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -58,75 +55,110 @@ export function CursorTrail() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Accessibility + mobile: disable entirely on touch devices.
-    // Matches the same guard in Cursor.tsx — touch screens have no mouse cursor.
+    // Respect reduced-motion preference
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    if (prefersReducedMotion || isTouch) return;
 
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
+    // Use devicePixelRatio (capped at 2) for sharp rendering on HiDPI
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
     const particles: Particle[] = [];
     let animationFrameId: number | null = null;
-    let isTouchMode = false;
-    // Touch scroll detection
-    let touchStartX = 0;
-    let touchStartY = 0;
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    // Battery / performance budget:
+    // On touch devices use a lower max particle count to preserve battery.
+    // On high-end machines (many CPU cores) allow more.
+    const cores = navigator.hardwareConcurrency ?? 4;
+    const MAX_PARTICLES = isTouch ? (cores >= 6 ? 80 : 50) : 200;
+
+    // Idle timer — stops the RAF loop when no events fire for 500ms
+    let idleTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleIdle = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        // Let remaining particles finish, then stop
+        if (particles.length === 0 && animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+      }, 500);
     };
 
-    window.addEventListener("resize", resize);
+    const resize = () => {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.scale(dpr, dpr);
+    };
+    window.addEventListener("resize", resize, { passive: true });
     resize();
 
-    const addParticles = (x: number, y: number, isTouch: boolean, amount: number = 2) => {
+    const addParticles = (x: number, y: number, amount: number) => {
       for (let i = 0; i < amount; i++) {
+        if (particles.length >= MAX_PARTICLES) break;
         particles.push(new Particle(x, y, isTouch));
       }
-      // Wake up the RAF loop if it's paused
       if (!animationFrameId) {
         animationFrameId = requestAnimationFrame(render);
       }
     };
 
-    // --- Mouse Events ---
+    // ── Mouse trail (desktop) ───────────────────────────────────────────────
     const onMouseMove = (e: MouseEvent) => {
-      if (isTouchMode) return;
-      addParticles(e.clientX, e.clientY, false, 2);
+      addParticles(e.clientX, e.clientY, 2);
+      scheduleIdle();
     };
 
-    // --- Touch Events ---
+    // ── Touch trail (mobile / tablet) ───────────────────────────────────────
+    // We track whether the gesture is primarily vertical (scrolling) so we
+    // don't fire particles during a scroll, only during swipes/taps.
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isScrollGesture = false;
+
     const onTouchStart = (e: TouchEvent) => {
-      isTouchMode = true;
       const touch = e.touches[0];
       if (!touch) return;
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
-      // Burst on touch start
-      addParticles(touch.clientX, touch.clientY, true, 10);
+      isScrollGesture = false;
+      // Burst on tap
+      addParticles(touch.clientX, touch.clientY, isTouch ? 12 : 6);
+      scheduleIdle();
     };
 
     const onTouchMove = (e: TouchEvent) => {
       const touch = e.touches[0];
       if (!touch) return;
-      // Only emit particles on horizontal/diagonal gestures, not vertical scroll
       const dx = Math.abs(touch.clientX - touchStartX);
       const dy = Math.abs(touch.clientY - touchStartY);
-      if (dy > dx * 1.5) return; // vertical scroll — skip particles
-      addParticles(touch.clientX, touch.clientY, true, 3);
+      // After 10px of movement, classify the gesture
+      if (dx + dy > 10 && !isScrollGesture) {
+        isScrollGesture = dy > dx * 1.5;
+      }
+      // Skip particles during vertical scroll to avoid performance impact
+      if (isScrollGesture) return;
+      addParticles(touch.clientX, touch.clientY, isTouch ? 4 : 2);
+      scheduleIdle();
     };
 
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    if (isTouch) {
+      window.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
+    } else {
+      window.addEventListener("mousemove", onMouseMove, { passive: true });
+    }
 
     const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      ctx.globalAlpha = 1;
 
-      // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.update();
@@ -137,7 +169,6 @@ export function CursorTrail() {
         }
       }
 
-      // Pause the loop when no particles remain — resumes on next input
       if (particles.length > 0) {
         animationFrameId = requestAnimationFrame(render);
       } else {
@@ -145,22 +176,20 @@ export function CursorTrail() {
       }
     };
 
-    // Don't start RAF until first input
-    // animationFrameId starts as null intentionally
-
     return () => {
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (idleTimer) clearTimeout(idleTimer);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-[9999]"
+      className="pointer-events-none fixed inset-0 z-[90]"
       aria-hidden="true"
     />
   );

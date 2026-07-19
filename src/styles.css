@@ -172,6 +172,17 @@
     color: var(--ivory);
   }
 
+  /*
+   * Scroll offset for sticky nav (72px header + 8px breathing room = 80px).
+   * Applied to every section and div with an id so that hash navigation,
+   * Lenis programmatic scroll, and browser Back/Forward all land precisely
+   * below the fixed header — never hidden behind it.
+   */
+  section[id],
+  div[id] {
+    scroll-margin-top: 5rem;
+  }
+
   /* Reduced motion: disable all animations for users who prefer it */
   @media (prefers-reduced-motion: reduce) {
     *,

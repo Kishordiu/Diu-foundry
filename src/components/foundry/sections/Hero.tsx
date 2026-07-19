@@ -82,7 +82,7 @@ export function Hero() {
             transition={{ delay: 1.9, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="col-span-12 flex flex-wrap items-center gap-4 md:col-span-6 md:col-start-7 md:justify-end"
           >
-            <MagneticButton to="/" hash="forge" primary>
+            <MagneticButton to="/forge" primary>
               Start Your Project
             </MagneticButton>
             <MagneticButton to="/" hash="foundry">
@@ -154,15 +154,17 @@ export function MagneticButton({
       to={to}
       hash={hash || undefined}
       onMouseMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
+        const el = ref.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
         setT({
           x: (e.clientX - (r.left + r.width / 2)) * 0.25,
           y: (e.clientY - (r.top + r.height / 2)) * 0.25,
         });
       }}
       onMouseLeave={() => setT({ x: 0, y: 0 })}
-      style={{ transform: `translate(${t.x}px, ${t.y}px)` }}
-      className={`group relative inline-flex items-center gap-3 rounded-full px-7 py-4 text-[11px] uppercase tracking-[0.2em] transition-all duration-500 shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep focus-visible:ring-offset-2 overflow-hidden ${
+      style={{ transform: `translate(${t.x}px, ${t.y}px)`, transition: t.x === 0 && t.y === 0 ? "transform 0.4s cubic-bezier(0.16,1,0.3,1)" : "transform 0.1s linear" }}
+      className={`group relative inline-flex items-center gap-3 rounded-full px-7 py-4 text-[11px] uppercase tracking-[0.2em] transition-colors duration-500 shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep focus-visible:ring-offset-2 overflow-hidden ${
         primary
           ? "bg-ink text-ivory hover:bg-violet-deep"
           : "border border-ink/15 text-ink hover:border-ink/30 glass-panel"

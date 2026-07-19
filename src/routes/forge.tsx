@@ -5,14 +5,12 @@ import { Mark } from "@/components/foundry/Mark";
 
 // ─── Web3Forms Configuration ─────────────────────────────────────────────────
 // Web3Forms delivers submissions directly to diufoundry@gmail.com.
-// Setup takes 60 seconds:
-//   1. Go to https://web3forms.com
-//   2. Enter diufoundry@gmail.com and click "Create Access Key"
-//   3. Check the inbox for diufoundry@gmail.com — copy the key from the email
-//   4. Paste it below, replacing PASTE_YOUR_KEY_HERE
-//
-// Free tier: 250 submissions/month. No account, no credit card required.
-const WEB3FORMS_KEY: string = "908b36ba-c4b8-4c28-a053-1333a4e659a0";
+// The access key is read from VITE_WEB3FORMS_KEY environment variable.
+// Create a .env.local file in the project root and add:
+//   VITE_WEB3FORMS_KEY=your_key_here
+// Get a free key at https://web3forms.com (250 submissions/month, no account needed).
+const WEB3FORMS_KEY: string =
+  import.meta.env.VITE_WEB3FORMS_KEY ?? "908b36ba-c4b8-4c28-a053-1333a4e659a0";
 
 // ─── Common world currencies ────────────────────────────────────────────────
 const CURRENCIES = [
@@ -231,14 +229,14 @@ function Forge() {
       } else {
         // Surface the actual error message from Web3Forms
         const msg = json.message || `HTTP ${res.status} ${res.statusText}`;
-        console.error("[DIU Forge] Submission failed:", msg);
+        if (import.meta.env.DEV) console.error("[DIU Forge] Submission failed:", msg);
         setErrorDetail(msg);
         setStatus("error");
       }
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Network error — please check your connection.";
-      console.error("[DIU Forge] Fetch error:", msg);
+      if (import.meta.env.DEV) console.error("[DIU Forge] Fetch error:", msg);
       setErrorDetail(msg);
       setStatus("error");
     }
@@ -460,10 +458,9 @@ function NotConfiguredScreen() {
         </p>
         <p>3. Check the Gmail inbox — copy the access key from the confirmation email</p>
         <p>
-          4. Open <span className="font-mono text-ivory/90">src/routes/forge.tsx</span> and paste
-          the key into:
+          4. Add the key to your environment variables as{" "}
+          <span className="font-mono text-amber-200/80">VITE_WEB3FORMS_KEY</span>
         </p>
-        <pre className="bg-ink/50 rounded-lg p-3 text-xs text-amber-200/80 mt-2 overflow-x-auto">{`const WEB3FORMS_KEY = "PASTE_YOUR_KEY_HERE";`}</pre>
         <p className="text-xs text-ivory/30 pt-1">
           Web3Forms is free for up to 250 submissions/month. No account required.
         </p>

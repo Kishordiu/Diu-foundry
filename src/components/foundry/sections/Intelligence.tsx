@@ -35,7 +35,7 @@ export function Intelligence() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: i * 0.05, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="group flex items-baseline justify-between border-b border-violet-deep/15 py-5 sm:py-6 md:py-8"
+              className="group flex items-baseline border-b border-violet-deep/15 py-5 sm:py-6 md:py-8"
             >
               <div className="flex items-baseline gap-4 sm:gap-6">
                 <span className="font-display text-xs sm:text-sm italic text-violet-deep/70">
@@ -45,12 +45,6 @@ export function Intelligence() {
                   {it}
                 </span>
               </div>
-              <span
-                aria-hidden="true"
-                className="translate-x-2 text-ink/40 opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:opacity-100"
-              >
-                ↗
-              </span>
             </motion.li>
           ))}
         </ul>

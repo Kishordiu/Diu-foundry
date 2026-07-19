@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mark, ArcDivider } from "../Mark";
+import { Link } from "@tanstack/react-router";
 
 const audiences = [
   {
@@ -64,9 +65,13 @@ export function Audiences() {
                     {audience.description}
                   </p>
                 </div>
-                <div className="mt-6 sm:mt-8 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-ivory/40 flex items-center gap-2">
-                  Select Profile <span aria-hidden="true">↗</span>
-                </div>
+                <Link
+                  to="/forge"
+                  className="mt-6 sm:mt-8 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-ivory/40 flex items-center gap-2 hover:text-ivory/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep rounded"
+                  aria-label={`Start a project as ${audience.role}`}
+                >
+                  Start a project <span aria-hidden="true">↗</span>
+                </Link>
               </motion.div>
             ))}
           </div>

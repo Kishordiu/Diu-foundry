@@ -31,7 +31,7 @@ export function Testimonials() {
         {/* Eyebrow */}
         <div className="flex items-center gap-4 text-[9px] sm:text-[10px] uppercase tracking-[0.4em] text-ink/50">
           <Mark className="h-5 w-5 sm:h-6 sm:w-6" stroke="gradient" />
-          <span>Chapter X</span>
+          <span>Chapter VIII</span>
           <span className="h-px w-8 sm:w-12 bg-ink/20" />
           <span>What we stand for</span>
         </div>

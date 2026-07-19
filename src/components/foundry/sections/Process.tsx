@@ -101,7 +101,7 @@ function StepCard({
 
 export function Process() {
   return (
-    <section id="forge" className="relative bg-ivory">
+    <section id="process" className="relative bg-ivory">
       <div className="text-lavender">
         <ArcDivider />
       </div>

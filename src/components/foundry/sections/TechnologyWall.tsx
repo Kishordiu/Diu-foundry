@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
 import { Mark } from "../Mark";
 
 const categories = [
@@ -55,6 +55,10 @@ function TiltCard({ cat, index }: { cat: (typeof categories)[number]; index: num
     setHovered(false);
   }
 
+  const sheenX = useTransform(rawX, [-0.5, 0.5], ["-200px", "200px"]);
+  const sheenY = useTransform(rawY, [-0.5, 0.5], ["-200px", "200px"]);
+  const sheenBg = useMotionTemplate`radial-gradient(400px circle at calc(50% + ${sheenX}) calc(50% + ${sheenY}), rgba(75, 42, 143, 0.06), transparent 40%)`;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -72,12 +76,10 @@ function TiltCard({ cat, index }: { cat: (typeof categories)[number]; index: num
         onMouseLeave={handleMouseLeave}
         className="group relative h-full overflow-hidden rounded-[2rem] border border-ink/8 bg-white p-7 sm:p-8 shadow-sm transition-shadow duration-500 hover:premium-shadow isolate"
       >
-        {/* Subtle radial sheen that follows cursor */}
+        {/* Reactive radial sheen — follows cursor via useMotionTemplate */}
         <motion.div
           className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{
-            background: `radial-gradient(400px circle at calc(50% + ${rawX.get() * 400}px) calc(50% + ${rawY.get() * 400}px), rgba(75, 42, 143, 0.04), transparent 40%)`,
-          }}
+          style={{ background: sheenBg }}
         />
 
         {/* Background Numeral */}

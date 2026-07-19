@@ -46,9 +46,9 @@ export function WhyDiu() {
               experiences from the ground up.
             </p>
             <div className="mt-8 sm:mt-10">
-              <MagneticButton to="/" hash="forge">
-                Work with the foundry
-              </MagneticButton>
+            <MagneticButton to="/forge">
+              Work with the foundry
+            </MagneticButton>
             </div>
           </div>
         </div>

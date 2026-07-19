@@ -22,7 +22,7 @@ export function TheSpark() {
         <div className="absolute inset-0 bg-gradient-to-b from-ink via-transparent to-ink" />
       </motion.div>
 
-      <div className="mx-auto grid min-h-[110svh] max-w-[1500px] grid-cols-12 items-center gap-6 px-6 py-40 md:px-12">
+      <div className="mx-auto grid min-h-[110vh] max-w-[1500px] grid-cols-12 items-center gap-6 px-6 py-40 md:px-12">
         <div className="col-span-12 md:col-span-6 md:col-start-7">
           <p className="mb-8 flex items-center gap-3 text-[10px] uppercase tracking-[0.5em] text-ivory/60">
             <span className="h-px w-8 bg-ivory/40" /> Chapter I
