@@ -1,187 +1,243 @@
-import { motion, useSpring, useMotionValue } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import { MagneticButton } from "@/components/foundry/MagneticButton";
+import sparkImg from "@/assets/spark_v2.webp";
 
+/**
+ * Chapter 00 — SPARK (Hero)
+ *
+ * Dark cinematic canvas. The film has just started.
+ * Giant typography assembles from below at three different parallax speeds.
+ * A tall editorial image fragment floats on the right.
+ * Micro-information populates top corners.
+ * Scroll hint at the bottom guides down.
+ */
 export function Hero() {
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 60, damping: 20 });
-  const sy = useSpring(my, { stiffness: 60, damping: 20 });
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
 
-  useEffect(() => {
-    // Skip expensive parallax on touch/mobile — no mouse to track
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    if (isTouch) return;
-    const onMove = (e: MouseEvent) => {
-      const nx = (e.clientX / window.innerWidth - 0.5) * 20;
-      const ny = (e.clientY / window.innerHeight - 0.5) * 20;
-      mx.set(nx);
-      my.set(ny);
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [mx, my]);
+  // Parallax layers — all values strictly [0, 1]
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+  const imgOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  const textY1 = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
+  const textY2 = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
+  const textY3 = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
+
+  const hintsOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
 
   return (
-    <section className="relative flex min-h-[100svh] items-end overflow-hidden pt-32 pb-12 sm:pb-16 md:pb-24">
-      {/* Atmospheric background */}
+    <section
+      ref={ref}
+      id="hero"
+      className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden bg-ink grain"
+      style={{ color: "#f5f3ef" }}
+    >
+      {/* Ambient violet glow — very subtle */}
       <motion.div
-        style={{ x: sx, y: sy }}
-        initial={{ scale: 1.3, opacity: 0 }}
-        animate={{ scale: 1.15, opacity: 0.7 }}
-        transition={{ duration: 4, ease: "easeOut" }}
-        className="pointer-events-none absolute -top-40 right-[-10%] h-[80vmin] w-[80vmin] rounded-full blur-3xl"
+        style={{ y: bgY }}
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
       >
-        <div className="h-full w-full rounded-full bg-[radial-gradient(circle,var(--color-lavender)_0%,var(--color-ivory)_60%)]" />
+        <div
+          className="absolute top-[20%] left-[10%] w-[40vw] h-[40vw] max-w-[600px] rounded-full opacity-[0.06]"
+          style={{
+            background: "radial-gradient(circle, #4b2a8f 0%, transparent 70%)",
+            filter: "blur(80px)",
+            animation: "glowPulse 6s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute bottom-[15%] right-[15%] w-[30vw] h-[30vw] max-w-[400px] rounded-full opacity-[0.04]"
+          style={{
+            background: "radial-gradient(circle, #c8451b 0%, transparent 70%)",
+            filter: "blur(100px)",
+          }}
+        />
       </motion.div>
-      <motion.div
-        style={{ x: sy, y: sx }}
-        initial={{ scale: 1.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.6 }}
-        transition={{ duration: 3, ease: "easeOut", delay: 0.2 }}
-        className="pointer-events-none absolute -bottom-32 left-[-15%] h-[70vmin] w-[70vmin] rounded-full blur-3xl"
-      >
-        <div className="h-full w-full rounded-full bg-[radial-gradient(circle,var(--color-violet-deep)_0%,transparent_70%)] opacity-20" />
-      </motion.div>
-      <BreathingGrain />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-[1500px] grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 md:px-12">
-        <div className="col-span-12 flex items-center gap-3 md:col-span-5">
-          <span className="h-px w-10 bg-ink/30" />
-          <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.5em] text-ink/60">
-            Chapter I · The Spark
+      {/* Traveling Spark */}
+      <motion.div
+        initial={{ top: "-10%" }}
+        animate={{ top: "110%" }}
+        transition={{ duration: 3.5, ease: "linear", repeat: Infinity, repeatDelay: 2 }}
+        className="absolute left-[8%] w-1 h-[20vh] z-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, transparent, #4b2a8f, #f5f3ef, transparent)",
+          filter: "blur(2px)",
+        }}
+      />
+
+      {/* Floating editorial image — tall portrait, right side */}
+      <motion.div
+        style={{ y: imgY, scale: imgScale, opacity: imgOpacity }}
+        className="absolute top-0 right-0 h-full w-[38vw] max-w-[520px] pointer-events-none z-0 hidden lg:block overflow-hidden"
+        aria-hidden="true"
+      >
+        <motion.div
+          initial={{ clipPath: "inset(0 0 100% 0)" }}
+          animate={{ clipPath: "inset(0 0 0% 0)" }}
+          transition={{ delay: 1.6, duration: 1.6, ease: [0.65, 0, 0.35, 1] }}
+          className="w-full h-full"
+        >
+          <img
+            src={sparkImg}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ filter: "grayscale(80%) contrast(1.15) brightness(0.7)" }}
+          />
+          {/* Gradient fade from left edge */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to right, #0b0a09 0%, transparent 35%, transparent 100%)",
+            }}
+          />
+          {/* Bottom fade */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(to top, #0b0a09 0%, transparent 30%)",
+            }}
+          />
+        </motion.div>
+
+        {/* Figure label */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.2, duration: 0.8 }}
+          className="absolute top-8 left-8 text-[9px] uppercase tracking-[0.4em] text-ivory/25 font-sans"
+        >
+          Fig 0.0 — Spark
+        </motion.div>
+      </motion.div>
+
+      {/* Top micro-info bar */}
+      <div className="foundry-container relative z-10 pt-28 sm:pt-32 flex items-start justify-between w-full">
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.7, duration: 0.7 }}
+          className="flex items-center gap-3"
+        >
+          <span className="h-px w-8 bg-ivory/20" />
+          <span className="text-[9px] uppercase tracking-[0.45em] text-ivory/30 font-sans">
+            00 / Spark
           </span>
-        </div>
-
-        <div className="col-span-12 mt-6 sm:mt-8">
-          <h1 className="font-display text-[15vw] sm:text-[13vw] md:text-[8.4vw] xl:text-[120px] leading-[0.92] tracking-[-0.02em]">
-            <RevealLine delay={1.8}>Every idea</RevealLine>
-            <RevealLine delay={1.95}>
-              is a <em className="italic text-violet-deep">spark.</em>
-            </RevealLine>
-            <RevealLine delay={2.1}>
-              <span className="grad-text">Build the flame.</span>
-            </RevealLine>
-          </h1>
-        </div>
-
-        <div className="col-span-12 mt-10 sm:mt-14 grid grid-cols-12 gap-6">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="col-span-12 max-w-lg text-sm sm:text-[15px] leading-relaxed text-ink/70 md:col-span-5 md:col-start-1"
-          >
-            DIU Foundry engineers intelligent AI systems, premium software, IoT ecosystems, embedded
-            technologies, automation platforms and modern digital experiences. We forge ideas into
-            intelligent products.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.9, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="col-span-12 flex flex-wrap items-center gap-4 md:col-span-6 md:col-start-7 md:justify-end"
-          >
-            <MagneticButton to="/forge" primary>
-              Start Your Project
-            </MagneticButton>
-            <MagneticButton to="/" hash="foundry">
-              Explore the Foundry
-            </MagneticButton>
-          </motion.div>
-        </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 2.0, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="col-span-12 mt-16 flex items-end justify-between border-t border-ink/10 pt-6 text-[10px] uppercase tracking-[0.25em] text-ink/50"
+          transition={{ delay: 2.0, duration: 0.8 }}
+          className="hidden md:flex flex-col items-end gap-[3px] text-[9px] uppercase tracking-[0.2em] text-ivory/20 font-sans"
+          aria-hidden="true"
         >
-          <span>Dominance · Intelligence · Unity</span>
-          <span className="hidden md:inline">Est. Foundry — MMXXVI</span>
-          <span aria-label="Scroll down">Scroll ↓</span>
+          <span>SYS_INIT: {new Date().getFullYear()}</span>
+          <span>LAT: 23.77 · LON: 90.39</span>
+          <span>STATUS: ACTIVE</span>
         </motion.div>
       </div>
-    </section>
-  );
-}
 
-function BreathingGrain() {
-  return (
-    <div
-      className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-multiply"
-      style={{
-        backgroundImage:
-          "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>\")",
-      }}
-    />
+      {/* Main typography composition */}
+      <div className="foundry-container relative z-10 flex-1 flex flex-col justify-center pb-20 sm:pb-32 w-full pt-8">
+        <h1
+          className="font-display text-ivory leading-none tracking-[-0.04em]"
+          style={{ fontSize: "clamp(3.8rem, 13vw, 11rem)" }}
+        >
+          {/* Line 1 */}
+          <motion.div style={{ y: textY1, opacity: textOpacity }}>
+            <RevealLine delay={1.4}>Every idea</RevealLine>
+          </motion.div>
+
+          {/* Line 2 */}
+          <motion.div style={{ y: textY2, opacity: textOpacity }}>
+            <RevealLine delay={1.55}>
+              is a{" "}
+              <em className="not-italic" style={{ color: "#4b2a8f" }}>
+                spark.
+              </em>
+            </RevealLine>
+          </motion.div>
+
+          {/* Line 3 */}
+          <motion.div style={{ y: textY3, opacity: textOpacity }} className="text-ivory/25">
+            <RevealLine delay={1.72}>Build the flame.</RevealLine>
+          </motion.div>
+        </h1>
+
+        {/* Supporting line + CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.1, duration: 1, ease: "easeOut" }}
+          className="mt-14 sm:mt-20 grid grid-cols-12 gap-6 items-end"
+        >
+          <div className="col-span-12 md:col-span-5">
+            <div className="text-[9px] uppercase tracking-[0.4em] text-ivory/25 mb-3 font-sans">
+              Core Directive
+            </div>
+            <p className="text-[14px] sm:text-[15px] leading-[1.65] text-ivory/45 max-w-sm font-sans">
+              DIU Foundry transforms ambitious ideas into digital products, AI systems, IoT
+              experiences, and experimental technology.
+            </p>
+          </div>
+
+          <div className="col-span-12 md:col-span-6 md:col-start-7 flex flex-wrap items-end gap-4 justify-start md:justify-end mt-6 md:mt-0">
+            {/* The user requested to remove the duplicate CTA "Ignite the Forge" from Hero.
+                We only keep a subtle magnetic button to scroll down or view work. */}
+            <MagneticButton to="/works" cursorLabel="explore">
+              Explore Projects
+            </MagneticButton>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Bottom scroll hint */}
+      <motion.div
+        style={{ opacity: hintsOpacity }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none z-10"
+        aria-hidden="true"
+      >
+        <span className="text-[9px] uppercase tracking-[0.4em] text-ivory/20 font-sans">
+          Scroll
+        </span>
+        <div
+          className="w-px h-10 bg-gradient-to-b from-ivory/30 to-transparent"
+          style={{ animation: "scrollHint 2s ease-in-out infinite" }}
+        />
+      </motion.div>
+
+      {/* Bottom edge line */}
+      <motion.div
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ delay: 2.5, duration: 1.8, ease: "easeOut" }}
+        className="absolute bottom-0 left-0 w-full h-px bg-ivory/8 origin-left"
+      />
+    </section>
   );
 }
 
 function RevealLine({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
-    <span className="block relative overflow-hidden">
+    <span className="word-reveal-line">
       <motion.span
-        // Removed filter:blur — blur on the LCP element blocks Lighthouse LCP metric.
-        // clipPath + y alone produce an equally premium masked reveal at zero GPU cost.
-        initial={{ y: "110%", clipPath: "inset(0 0 100% 0)" }}
-        animate={{ y: 0, clipPath: "inset(-20% 0 -20% 0)" }}
-        transition={{ delay, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        className="block"
+        initial={{ y: "108%", rotate: 1.5 }}
+        animate={{ y: 0, rotate: 0 }}
+        transition={{ delay, duration: 1.1, ease: "easeOut" }}
+        className="block origin-bottom-left"
       >
         {children}
       </motion.span>
     </span>
-  );
-}
-
-export function MagneticButton({
-  children,
-  to,
-  hash,
-  primary = false,
-}: {
-  children: React.ReactNode;
-  to: string;
-  hash?: string;
-  primary?: boolean;
-}) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const [t, setT] = useState({ x: 0, y: 0 });
-  return (
-    <Link
-      ref={ref}
-      to={to}
-      hash={hash || undefined}
-      onMouseMove={(e) => {
-        const el = ref.current;
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        setT({
-          x: (e.clientX - (r.left + r.width / 2)) * 0.25,
-          y: (e.clientY - (r.top + r.height / 2)) * 0.25,
-        });
-      }}
-      onMouseLeave={() => setT({ x: 0, y: 0 })}
-      style={{ transform: `translate(${t.x}px, ${t.y}px)`, transition: t.x === 0 && t.y === 0 ? "transform 0.4s cubic-bezier(0.16,1,0.3,1)" : "transform 0.1s linear" }}
-      className={`group relative inline-flex items-center gap-3 rounded-full px-7 py-4 text-[11px] uppercase tracking-[0.2em] transition-colors duration-500 shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep focus-visible:ring-offset-2 overflow-hidden ${
-        primary
-          ? "bg-ink text-ivory hover:bg-violet-deep"
-          : "border border-ink/15 text-ink hover:border-ink/30 glass-panel"
-      }`}
-    >
-      {/* Subtle sweep highlight */}
-      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[sweep_1.5s_ease-in-out_infinite]" />
-      <span className="relative z-10">{children}</span>
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 14 14"
-        className="relative z-10 transition-transform group-hover:translate-x-1"
-        aria-hidden="true"
-      >
-        <path d="M1 7h11M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" fill="none" />
-      </svg>
-    </Link>
   );
 }

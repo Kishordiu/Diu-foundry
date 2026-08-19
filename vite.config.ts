@@ -28,15 +28,14 @@ export default defineConfig(({ mode }) => {
             // Framer Motion — large animation library, deferred where possible
             if (id.includes("framer-motion")) return "vendor-framer";
             // TanStack router + query — routing infrastructure
-            if (
-              id.includes("@tanstack/react-router") ||
-              id.includes("@tanstack/react-query")
-            )
+            if (id.includes("@tanstack/react-router") || id.includes("@tanstack/react-query"))
               return "vendor-tanstack";
             // Radix UI — used only in the Forge form
             if (id.includes("@radix-ui")) return "vendor-radix";
             // Lenis smooth scroll
             if (id.includes("lenis")) return "vendor-lenis";
+            // GSAP + ScrollTrigger
+            if (id.includes("gsap")) return "vendor-gsap";
             // Lucide icons
             if (id.includes("lucide-react")) return "vendor-icons";
           },

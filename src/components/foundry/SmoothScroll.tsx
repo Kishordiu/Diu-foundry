@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { initGSAP, ScrollTrigger } from "@/lib/gsap";
 
 /**
  * Module-level Lenis ref — allows Nav and any other component to call
  * lenisScrollTo() without prop-drilling or context overhead.
- *
- * Safe to import anywhere: it's null until SmoothScroll mounts.
  */
 let _lenis: Lenis | null = null;
 const _scrollListeners: Array<(y: number) => void> = [];
+const _velocityListeners: Array<(v: number) => void> = [];
 
 export function getLenis(): Lenis | null {
   return _lenis;
@@ -16,14 +16,12 @@ export function getLenis(): Lenis | null {
 
 /**
  * Programmatically scroll to a CSS selector, element, or numeric offset.
- * Respects the sticky nav height automatically via the `offset` parameter.
  */
 export function lenisScrollTo(
   target: string | HTMLElement | number,
-  options: { offset?: number; duration?: number } = {}
+  options: { offset?: number; duration?: number } = {},
 ) {
   if (!_lenis) {
-    // Lenis not ready — fall back to native scroll
     if (typeof target === "string") {
       const el = document.querySelector(target);
       if (el) {
@@ -42,7 +40,6 @@ export function lenisScrollTo(
 
 /**
  * Subscribe to scroll position changes (y in pixels).
- * Returns an unsubscribe function.
  */
 export function onLenisScroll(cb: (y: number) => void): () => void {
   _scrollListeners.push(cb);
@@ -52,8 +49,27 @@ export function onLenisScroll(cb: (y: number) => void): () => void {
   };
 }
 
+/**
+ * Subscribe to scroll velocity changes.
+ */
+export function onLenisVelocity(cb: (v: number) => void): () => void {
+  _velocityListeners.push(cb);
+  return () => {
+    const idx = _velocityListeners.indexOf(cb);
+    if (idx !== -1) _velocityListeners.splice(idx, 1);
+  };
+}
+
+/** Get current scroll velocity */
+export function getScrollVelocity(): number {
+  return _lenis?.velocity ?? 0;
+}
+
 export function SmoothScroll() {
   useEffect(() => {
+    // Initialize GSAP + ScrollTrigger
+    initGSAP();
+
     const lenis = new Lenis({
       duration: 1.35,
       easing: (t) => 1 - Math.pow(1 - t, 3),
@@ -62,20 +78,45 @@ export function SmoothScroll() {
 
     _lenis = lenis;
 
-    // Broadcast scroll position to all listeners (used by Nav scroll spy)
-    lenis.on("scroll", ({ scroll }: { scroll: number }) => {
+    // Broadcast scroll position and velocity to all listeners
+    lenis.on("scroll", ({ scroll, velocity }: { scroll: number; velocity: number }) => {
       for (const cb of _scrollListeners) cb(scroll);
+      for (const cb of _velocityListeners) cb(velocity);
     });
 
-    let raf = 0;
-    const loop = (time: number) => {
-      lenis.raf(time);
-      raf = requestAnimationFrame(loop);
+    // Connect Lenis to GSAP ScrollTrigger
+    lenis.on("scroll", ScrollTrigger.update);
+
+    // Use GSAP ticker for the Lenis RAF loop (synchronized with ScrollTrigger)
+    const tickerCallback = (time: number) => {
+      lenis.raf(time * 1000);
     };
-    raf = requestAnimationFrame(loop);
+
+    // Disable GSAP's default lag smoothing to stay in sync with Lenis
+    (window as any).gsap?.ticker?.lagSmoothing?.(0);
+
+    // Add Lenis update to GSAP ticker
+    const gsapModule = (window as any).gsap;
+    if (gsapModule?.ticker) {
+      gsapModule.ticker.add(tickerCallback);
+    } else {
+      // Fallback: use requestAnimationFrame
+      let raf = 0;
+      const loop = (time: number) => {
+        lenis.raf(time);
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+
+      return () => {
+        cancelAnimationFrame(raf);
+        lenis.destroy();
+        _lenis = null;
+      };
+    }
 
     return () => {
-      cancelAnimationFrame(raf);
+      gsapModule?.ticker?.remove?.(tickerCallback);
       lenis.destroy();
       _lenis = null;
     };

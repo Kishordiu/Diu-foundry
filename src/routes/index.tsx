@@ -1,78 +1,62 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
-
-// ── Above fold: loaded immediately for fast FCP + LCP ──────────────────────
-import { Loader } from "@/components/foundry/Loader";
-import { SmoothScroll } from "@/components/foundry/SmoothScroll";
-import { Cursor } from "@/components/foundry/Cursor";
-import { Hero } from "@/components/foundry/sections/Hero";
-import { TheSpark } from "@/components/foundry/sections/TheSpark";
-// Footer is statically imported by other routes (insights, works), so no benefit to lazy-loading it here
-import { Footer } from "@/components/foundry/sections/Footer";
-
-// ── Below fold: lazily loaded after the hero is painted ────────────────────
-const Audiences = lazy(() =>
-  import("@/components/foundry/sections/Audiences").then((m) => ({ default: m.Audiences }))
-);
-const TheFoundry = lazy(() =>
-  import("@/components/foundry/sections/TheFoundry").then((m) => ({ default: m.TheFoundry }))
-);
-const WhyDiu = lazy(() =>
-  import("@/components/foundry/sections/WhyDiu").then((m) => ({ default: m.WhyDiu }))
-);
-const InnovationPhilosophy = lazy(() =>
-  import("@/components/foundry/sections/InnovationPhilosophy").then((m) => ({
-    default: m.InnovationPhilosophy,
-  }))
-);
-const Intelligence = lazy(() =>
-  import("@/components/foundry/sections/Intelligence").then((m) => ({ default: m.Intelligence }))
-);
-const Engineering = lazy(() =>
-  import("@/components/foundry/sections/Engineering").then((m) => ({ default: m.Engineering }))
-);
-const TechnologyWall = lazy(() =>
-  import("@/components/foundry/sections/TechnologyWall").then((m) => ({
-    default: m.TechnologyWall,
-  }))
-);
-const Testimonials = lazy(() =>
-  import("@/components/foundry/sections/Testimonials").then((m) => ({ default: m.Testimonials }))
-);
-const Process = lazy(() =>
-  import("@/components/foundry/sections/Process").then((m) => ({ default: m.Process }))
-);
-const Connect = lazy(() =>
-  import("@/components/foundry/sections/Connect").then((m) => ({ default: m.Connect }))
-);
+import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
+import { Loader } from "@/components/home/Loader";
+import { OpeningHero } from "@/components/home/OpeningHero";
+import { Philosophy } from "@/components/home/Philosophy";
+import { Capabilities } from "@/components/home/Capabilities";
+import { SelectedWork } from "@/components/home/SelectedWork";
+import { TheProcess } from "@/components/home/TheProcess";
+import { ExperimentalMoment } from "@/components/home/ExperimentalMoment";
+import { ContactForge } from "@/components/home/ContactForge";
+import { TechStream } from "@/components/home/TechStream";
+import { AllianceMoment } from "@/components/home/AllianceMoment";
 
 export const Route = createFileRoute("/")({
-  component: Foundry,
+  head: () => ({
+    meta: [
+      { title: "DIU Foundry — Every Idea is a Spark. Build the Flame." },
+      {
+        name: "description",
+        content:
+          "DIU Foundry is a technology foundry that transforms ambitious ideas into digital products, AI systems, IoT experiences, and experimental technology.",
+      },
+    ],
+  }),
+  component: Home,
 });
 
-function Foundry() {
+function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Once loading is complete, we allow scrolling.
+  // Lenis handles the smooth scroll. We just need to hide overflow-y while loading.
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      window.scrollTo(0, 0);
+    }
+  }, [isLoading]);
+
   return (
-    <div id="top" className="relative overflow-x-hidden bg-ivory text-ink">
-      <Loader />
-      <SmoothScroll />
-      <Cursor />
-      {/* Above fold — painted immediately */}
-      <Hero />
-      <TheSpark />
-      {/* Below fold — deferred until after hero paint */}
-      <Suspense fallback={null}>
-        <Audiences />
-        <TheFoundry />
-        <WhyDiu />
-        <InnovationPhilosophy />
-        <Intelligence />
-        <Engineering />
-        <TechnologyWall />
-        <Testimonials />
-        <Process />
-        <Connect />
-        <Footer />
-      </Suspense>
-    </div>
+    <>
+      <AnimatePresence>
+        {isLoading && <Loader onComplete={() => setIsLoading(false)} />}
+      </AnimatePresence>
+
+      <main className="bg-ink text-ivory selection:bg-violet-deep selection:text-ivory">
+        <OpeningHero />
+        <Philosophy />
+        <Capabilities />
+        <TechStream />
+        <SelectedWork />
+        <TheProcess />
+        <AllianceMoment />
+        <ExperimentalMoment />
+        <ContactForge />
+      </main>
+    </>
   );
 }

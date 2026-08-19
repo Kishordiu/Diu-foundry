@@ -42,7 +42,7 @@ export function Testimonials() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="mt-10 sm:mt-14 font-display text-4xl sm:text-5xl md:text-6xl leading-[1.04] tracking-tight max-w-2xl text-balance"
         >
           How we work with <br className="hidden sm:block" />
@@ -57,7 +57,7 @@ export function Testimonials() {
               initial={{ opacity: 0, filter: "blur(4px)", y: 16 }}
               whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ delay: i * 0.07, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: i * 0.07, duration: 0.6, ease: "easeOut" }}
               className="group relative bg-ivory p-8 sm:p-10 md:p-14 hover:bg-white transition-colors duration-500 overflow-hidden isolate"
             >
               {/* Hover accent line */}
@@ -65,7 +65,7 @@ export function Testimonials() {
                 className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-deep/50 to-transparent"
                 initial={{ scaleX: 0 }}
                 whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
                 style={{ transformOrigin: "left" }}
                 aria-hidden="true"
               />

@@ -42,7 +42,7 @@ function StepCard({
             className="h-full bg-gradient-to-r from-violet-deep/40 to-violet-deep/10"
             initial={{ scaleX: 0 }}
             animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
-            transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
             style={{ transformOrigin: "left" }}
             aria-hidden="true"
           />
@@ -57,7 +57,7 @@ function StepCard({
             ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
             : { opacity: 0, y: 32, scale: 0.97, filter: "blur(8px)" }
         }
-        transition={{ delay: index * 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: index * 0.15, duration: 0.7, ease: "easeOut" }}
         whileHover={{ y: -4, scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
         className="group relative rounded-[2rem] border border-ink/8 bg-white p-8 sm:p-10 shadow-sm hover:premium-shadow transition-shadow duration-500 overflow-hidden cursor-default isolate"
@@ -67,7 +67,7 @@ function StepCard({
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-deep/60 to-transparent"
           initial={{ opacity: 0, scaleX: 0 }}
           whileHover={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
           style={{ transformOrigin: "center" }}
           aria-hidden="true"
         />

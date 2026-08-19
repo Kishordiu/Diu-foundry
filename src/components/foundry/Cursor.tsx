@@ -1,256 +1,285 @@
 import { useEffect, useRef } from "react";
 
-// DIU brand palette — subtle shifting tones, pre-parsed for fast canvas ops
-// Format: [r, g, b] so we can compose rgba() cheaply without string parsing
-const PALETTE: [number, number, number][] = [
-  [255, 255, 255], // pearl white
-  [230, 220, 255], // lavender
-  [180, 150, 240], // violet
-  [140, 160, 255], // soft blue glint
-  [255, 200, 230], // subtle pink glint
-  [255, 248, 235], // faint warm star
-];
-
-// Object pool so we never allocate/GC during animation
-interface Particle {
+class GlitchSpark {
   x: number;
   y: number;
-  size: number;
-  r: number;
-  g: number;
-  b: number;
-  alpha: number;
+  vx: number;
+  vy: number;
   life: number;
   maxLife: number;
-  driftX: number;
-  driftY: number;
-  twinkleSpeed: number;
-  active: boolean;
-}
+  size: number;
+  color: string;
+  char: string;
 
-const POOL_SIZE = 150;
-const pool: Particle[] = Array.from({ length: POOL_SIZE }, () => ({
-  x: 0,
-  y: 0,
-  size: 1,
-  r: 255,
-  g: 255,
-  b: 255,
-  alpha: 0,
-  life: 0,
-  maxLife: 1,
-  driftX: 0,
-  driftY: 0,
-  twinkleSpeed: 0.1,
-  active: false,
-}));
+  constructor(x: number, y: number, vx: number, vy: number, isHoveringProject: boolean = false, isCTA: boolean = false) {
+    this.x = x;
+    this.vx = vx * 0.35 + (Math.random() - 0.5) * 1.5;
+    this.vy = vy * 0.35 + (Math.random() - 0.5) * 1.5;
+    
+    // Fast cursor = longer life
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    const lifeBonus = Math.min(speed * 1.5, 15);
+    this.maxLife = Math.random() * (isHoveringProject ? 35 : 20) + 10 + lifeBonus;
+    this.life = this.maxLife;
+    
+    this.size = Math.random() * 5 + 6; 
 
-let poolHead = 0;
+    // Multilingual & Mathematical Fragments
+    const chars = [
+      "1", "0", "x", "+", "-", "≈", "∑", "∆", "λ", "µ", "∫", "π",
+      "அ", "ஆ", "இ", "க", "ந", "ம",
+      "<", ">", "{", "}", "/", "A", "I"
+    ];
+    this.char = chars[Math.floor(Math.random() * chars.length)];
 
-function acquireParticle(x: number, y: number, dx: number, dy: number): Particle | null {
-  // Walk pool for a free slot (circular buffer)
-  for (let tries = 0; tries < POOL_SIZE; tries++) {
-    const p = pool[poolHead % POOL_SIZE];
-    poolHead++;
-    if (!p.active) {
-      const [r, g, b] = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-      p.x = x;
-      p.y = y;
-      p.r = r;
-      p.g = g;
-      p.b = b;
-      p.size = 0.6 + Math.random() * 1.4;
-      p.maxLife = 28 + Math.random() * 28;
-      p.life = p.maxLife;
-      p.alpha = 1;
-      p.driftX = dx * -0.012 + (Math.random() - 0.5) * 0.4;
-      p.driftY = dy * -0.012 + (Math.random() - 0.5) * 0.4;
-      p.twinkleSpeed = 0.1 + Math.random() * 0.25;
-      p.active = true;
-      return p;
+    if (isCTA) {
+      // CTA Hover: Sea-green & Cyan
+      const hues = [150, 160, 170, 180];
+      this.color = `hsla(${hues[Math.floor(Math.random() * hues.length)]}, 80%, 70%, `;
+    } else {
+      // General movement: Refracted light colors
+      const rand = Math.random();
+      if (rand > 0.9) this.color = "rgba(255, 255, 255, "; // Steel white
+      else if (rand > 0.75) this.color = "rgba(245, 243, 239, "; // Ivory
+      else if (rand > 0.6) this.color = "rgba(0, 255, 180, "; // Sea green
+      else if (rand > 0.45) this.color = "rgba(0, 200, 255, "; // Cyan
+      else if (rand > 0.3) this.color = "rgba(75, 42, 143, "; // Violet
+      else if (rand > 0.2) this.color = "rgba(200, 50, 150, "; // Subtle magenta
+      else this.color = "rgba(120, 140, 150, "; // Muted steel
     }
   }
-  return null; // pool exhausted — skip this particle
+
+  update(slowDown: boolean) {
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    if (slowDown) {
+      this.vx *= 0.92;
+      this.vy *= 0.92;
+    } else {
+      this.vx *= 0.98;
+      this.vy *= 0.98;
+    }
+    
+    // Sharp direction changes / glitches
+    if (Math.random() > 0.97) {
+      this.x += (Math.random() - 0.5) * 5;
+      this.y += (Math.random() - 0.5) * 5;
+    }
+    this.life--;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    const rawOpacity = Math.max(0, this.life / this.maxLife);
+    const opacity = rawOpacity * rawOpacity; // Non-linear decay
+    ctx.fillStyle = `${this.color}${opacity})`;
+    ctx.font = `${this.size}px 'JetBrains Mono', monospace`;
+    ctx.fillText(this.char, this.x, this.y);
+  }
 }
 
 export function Cursor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const emblemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const emblem = emblemRef.current;
+    if (!canvas || !emblem) return;
 
-    // Accessibility + mobile: disable entirely when not needed
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    if (prefersReducedMotion || isTouch) return;
-
-    const ctx = canvas.getContext("2d", {
-      alpha: true,
-      // Hint to browser: we only read from this canvas in JS, never via getImageData
-      desynchronized: true,
-    });
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Use device pixel ratio capped at 2 — no benefit beyond 2 for this effect
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    let width = 0;
-    let height = 0;
-
     const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.scale(dpr, dpr);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
-    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("resize", resize);
 
-    // Track mouse state
-    let lastX = -1;
-    let lastY = -1;
-    let isScrolling = false;
-    let scrollTimer = 0;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Use a throttle ref to gate particle creation (not a React state — pure ref)
-    let lastSpawnTime = 0;
-    const SPAWN_INTERVAL_MS = 14; // ~71hz max spawn rate, well under 120fps
+    let p: GlitchSpark[] = [];
+    let rafId = 0;
+    
+    let isHoveringProject = false;
+    let isHoveringCTA = false;
+
+    const spawnSparks = (x: number, y: number, count: number, spread: number, vx = 0, vy = 0) => {
+      for (let i = 0; i < count; i++) {
+        const pVx = vx + (Math.random() - 0.5) * spread;
+        const pVy = vy + (Math.random() - 0.5) * spread;
+        p.push(new GlitchSpark(x, y, pVx, pVy, isHoveringProject, isHoveringCTA));
+      }
+    };
+
+    if (isTouch || prefersReduced) {
+      if (!prefersReduced) {
+        let lastTouch = { x: -1, y: -1, time: 0 };
+
+        const onTouchStart = (e: TouchEvent) => {
+          const t = e.touches[0];
+          if (!t) return;
+          lastTouch = { x: t.clientX, y: t.clientY, time: performance.now() };
+          spawnSparks(t.clientX, t.clientY, 4, 2);
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+          const t = e.touches[0];
+          if (!t) return;
+          const now = performance.now();
+          const dt = Math.max(1, now - lastTouch.time);
+          const vx = (t.clientX - lastTouch.x) / dt * 10;
+          const vy = (t.clientY - lastTouch.y) / dt * 10;
+          const vel = Math.sqrt(vx * vx + vy * vy);
+          
+          if (vel > 0.1) {
+            spawnSparks(t.clientX, t.clientY, Math.max(1, Math.min(Math.floor(vel * 1.5), 5)), 2, -vx * 0.1, -vy * 0.1);
+          }
+          lastTouch = { x: t.clientX, y: t.clientY, time: now };
+        };
+
+        const onTouchEnd = () => {
+          if (lastTouch.x !== -1) {
+            spawnSparks(lastTouch.x, lastTouch.y, 8, 4);
+          }
+        };
+
+        window.addEventListener("touchstart", onTouchStart, { passive: true });
+        window.addEventListener("touchmove", onTouchMove, { passive: true });
+        window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+        const renderTouch = () => {
+          ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          ctx.globalCompositeOperation = "screen";
+          for (let i = p.length - 1; i >= 0; i--) {
+            p[i].update(false);
+            if (p[i].life <= 0) p.splice(i, 1);
+            else p[i].draw(ctx);
+          }
+          rafId = requestAnimationFrame(renderTouch);
+        };
+        rafId = requestAnimationFrame(renderTouch);
+
+        return () => {
+          window.removeEventListener("touchstart", onTouchStart);
+          window.removeEventListener("touchmove", onTouchMove);
+          window.removeEventListener("touchend", onTouchEnd);
+          cancelAnimationFrame(rafId);
+          window.removeEventListener("resize", resize);
+        };
+      }
+      return;
+    }
+
+    document.documentElement.style.cursor = "none";
+
+    let mouseX = -100;
+    let mouseY = -100;
+    let lastX = -100;
+    let lastY = -100;
+    let emblemX = -100;
+    let emblemY = -100;
+
+    const SPRING = 0.25;
 
     const onMove = (e: MouseEvent) => {
-      // While scroll jank guard is active, don't spawn
-      if (isScrolling) return;
-
-      const now = performance.now();
-      if (now - lastSpawnTime < SPAWN_INTERVAL_MS) return;
-      lastSpawnTime = now;
-
-      const cx = e.clientX;
-      const cy = e.clientY;
-
-      if (lastX === -1) {
-        lastX = cx;
-        lastY = cy;
-        return;
-      }
-
-      const dx = cx - lastX;
-      const dy = cy - lastY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      // Only spawn if pointer has actually moved (avoids burst on first move)
-      if (dist < 1.5) {
-        lastX = cx;
-        lastY = cy;
-        return;
-      }
-
-      // Interpolate max 4 points per frame to keep particle density controlled
-      const steps = Math.min(4, Math.max(1, Math.floor(dist / 4)));
-      for (let i = 0; i < steps; i++) {
-        const t = i / steps;
-        const jx = (Math.random() - 0.5) * 2;
-        const jy = (Math.random() - 0.5) * 2;
-        acquireParticle(lastX + dx * t + jx, lastY + dy * t + jy, dx, dy);
-      }
-
-      lastX = cx;
-      lastY = cy;
+      lastX = mouseX;
+      lastY = mouseY;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     };
 
-    // Detect scroll and briefly pause particle spawning to avoid jank during scroll
-    const onScroll = () => {
-      isScrolling = true;
-      clearTimeout(scrollTimer);
-      scrollTimer = window.setTimeout(() => {
-        isScrolling = false;
-      }, 150);
+    const checkTarget = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const cursorEl = target.closest("[data-cursor]") as HTMLElement | null;
+      isHoveringProject = cursorEl?.getAttribute("data-cursor") === "explore" || cursorEl?.getAttribute("data-cursor") === "view";
+      const isButton = target.closest("button") || target.closest("a");
+      isHoveringCTA = isButton !== null;
+
+      emblem.classList.toggle("is-active", isHoveringProject || isHoveringCTA);
+      if (isHoveringCTA) emblem.classList.add("is-cta");
+      else emblem.classList.remove("is-cta");
     };
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    let rafId = 0;
 
     const render = () => {
-      // Clear with a plain clearRect — no compositing needed here
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      // Draw all active particles using source-over (default) with pre-composed rgba
-      // NO shadowBlur — replaced with a simple radial gradient glow per particle
-      // NO globalCompositeOperation changes inside the loop
-      let hasActive = false;
+      emblemX += (mouseX - emblemX) * SPRING;
+      emblemY += (mouseY - emblemY) * SPRING;
 
-      for (let i = 0; i < POOL_SIZE; i++) {
-        const p = pool[i];
-        if (!p.active) continue;
+      const vx = mouseX - lastX;
+      const vy = mouseY - lastY;
+      const vel = Math.sqrt(vx * vx + vy * vy);
+      const isSlow = vel < 1.0;
 
-        // Update
-        p.x += p.driftX;
-        p.y += p.driftY;
-        p.life--;
+      const angle = Math.atan2(vy, vx);
+      const stretch = Math.min(1 + vel * 0.01, 1.5);
+      const squeeze = Math.max(1 - vel * 0.005, 0.6);
 
-        if (p.life <= 0) {
-          p.active = false;
-          continue;
+      const size = (isHoveringProject || isHoveringCTA) ? 24 : 12;
+      emblem.style.width = `${size}px`;
+      emblem.style.height = `${size}px`;
+      emblem.style.transform = `translate(${emblemX - size / 2}px, ${emblemY - size / 2}px) rotate(${angle}rad) scaleX(${stretch}) scaleY(${squeeze})`;
+
+      if (lastX !== -100 && lastY !== -100) {
+        if (vel > 0.1) {
+          // Slow movement: spawn occasionally
+          if (Math.random() < 0.3) {
+            spawnSparks(mouseX, mouseY, 1, 1, 0, 0);
+          }
         }
-
-        hasActive = true;
-
-        const progress = p.life / p.maxLife;
-        const eased = progress * progress; // quadratic ease-out (cheap)
-        const twinkle = 0.85 + Math.sin(p.life * p.twinkleSpeed) * 0.15;
-        p.alpha = eased * twinkle;
-
-        if (p.alpha < 0.01) continue;
-
-        // Draw: a simple filled circle with no shadow, no save/restore per particle
-        // A subtle glow is approximated by drawing two concentric circles:
-        // outer (large, very transparent) + inner (small, opaque)
-        const r = p.size;
-        const glowR = r * 2.8;
-        const a = p.alpha;
-
-        // Outer glow ring — single fillRect with low alpha for cheap bloom illusion
-        ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${(a * 0.12).toFixed(3)})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Inner core — full alpha
-        ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${a.toFixed(3)})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.fill();
+        if (vel > 1.5) {
+          // Fast movement: dense trail
+          const spawnCount = Math.min(Math.floor(vel / 6), isHoveringProject ? 6 : 4);
+          for (let i = 0; i < Math.max(1, spawnCount); i++) {
+            const lerp = Math.random();
+            const px = lastX + vx * lerp;
+            const py = lastY + vy * lerp;
+            spawnSparks(px, py, 1, 3, -vx * 0.15, -vy * 0.15);
+          }
+        }
       }
 
-      // Suppress the warning about unused variable — hasActive used for future opt
-      void hasActive;
+      ctx.globalCompositeOperation = "screen";
+      for (let i = p.length - 1; i >= 0; i--) {
+        p[i].update(isSlow);
+        if (p[i].life <= 0) p.splice(i, 1);
+        else p[i].draw(ctx);
+      }
+
+      lastX += (mouseX - lastX) * 0.5;
+      lastY += (mouseY - lastY) * 0.5;
 
       rafId = requestAnimationFrame(render);
     };
 
-    render();
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("mouseover", checkTarget, { passive: true });
+    rafId = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(rafId);
-      clearTimeout(scrollTimer);
-      window.removeEventListener("mousemove", onMove);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("scroll", onScroll);
-      // Reset all particles in pool on unmount
-      for (let i = 0; i < POOL_SIZE; i++) pool[i].active = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseover", checkTarget);
+      document.documentElement.style.cursor = "";
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-[80]"
-      aria-hidden="true"
-    />
+    <>
+      <canvas ref={canvasRef} className="cursor-canvas" aria-hidden="true" style={{ pointerEvents: 'none', zIndex: 9998 }} />
+      <div ref={emblemRef} className="cursor-emblem transition-colors duration-300 pointer-events-none" aria-hidden="true" style={{ pointerEvents: 'none', zIndex: 9999 }}>
+        <div className="w-full h-full rounded-full border border-ivory/30 shadow-[0_0_12px_rgba(255,255,255,0.1)] relative overflow-hidden flex items-center justify-center transition-all duration-300 backdrop-blur-sm">
+          <div className="w-1/2 h-1/2 rounded-full bg-ivory/50" />
+        </div>
+      </div>
+    </>
   );
 }

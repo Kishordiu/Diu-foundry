@@ -64,7 +64,7 @@ function TiltCard({ cat, index }: { cat: (typeof categories)[number]; index: num
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ delay: index * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay: index * 0.08, duration: 0.6, ease: "easeOut" }}
       style={{ perspective: 800 }}
       className="col-span-12 sm:col-span-6 xl:col-span-4"
     >

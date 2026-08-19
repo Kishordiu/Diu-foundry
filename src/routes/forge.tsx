@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mark } from "@/components/foundry/Mark";
+import { RainSystem } from "@/components/home/RainSystem";
 
 // ─── Web3Forms Configuration ─────────────────────────────────────────────────
 // Web3Forms delivers submissions directly to diufoundry@gmail.com.
@@ -110,7 +111,8 @@ function Forge() {
     if (currentStep === 1) {
       if (!data.name.trim()) newErrors.name = "Name is required";
       if (!data.email.trim()) newErrors.email = "Email is required";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) newErrors.email = "Please enter a valid email";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+        newErrors.email = "Please enter a valid email";
       if (!data.country.trim()) newErrors.country = "Country is required";
       if (!data.visitorType.trim()) newErrors.visitorType = "Role is required";
     } else if (currentStep === 2) {
@@ -258,10 +260,40 @@ function Forge() {
       </header>
 
       <main
-        className="flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 pt-24 pb-12"
+        className="relative flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 pt-24 pb-12 overflow-hidden z-0"
         aria-label="Project intake form"
       >
-        <div className="w-full max-w-2xl">
+        {/* Crystal / Water Forge Environment */}
+        <div className="absolute inset-0 pointer-events-none z-[-1]">
+          <svg className="absolute w-0 h-0">
+            <defs>
+              <filter id="forge-crystal" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015 0.02" numOctaves="3" result="noise" seed="4">
+                  <animate attributeName="baseFrequency" values="0.015 0.02;0.02 0.015;0.015 0.02" dur="20s" repeatCount="indefinite" />
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="G" />
+              </filter>
+            </defs>
+          </svg>
+          
+          <div className="absolute inset-0 mix-blend-screen opacity-50" style={{ filter: "url(#forge-crystal) blur(5px)" }}>
+            <motion.div 
+              animate={{ x: ["-5%", "5%", "-5%"], y: ["-5%", "5%", "-5%"] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute top-1/4 left-1/4 w-[60vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(0,255,128,0.15)_0%,transparent_60%)] blur-3xl"
+            />
+            <motion.div 
+              animate={{ x: ["5%", "-5%", "5%"], y: ["5%", "-5%", "5%"] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute bottom-1/4 right-1/4 w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(circle,rgba(75,42,143,0.15)_0%,transparent_60%)] blur-[100px]"
+            />
+          </div>
+          
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-40 mix-blend-overlay" />
+          <RainSystem />
+        </div>
+
+        <div className="w-full max-w-2xl relative z-10">
           {status === "success" ? (
             <SuccessScreen />
           ) : status === "not_configured" ? (
@@ -324,7 +356,15 @@ function Forge() {
               {/* Wizard panel */}
               <div className="rounded-2xl sm:rounded-[2rem] border border-ivory/10 bg-white/[0.03] p-6 sm:p-8 md:p-12 backdrop-blur-xl min-h-[460px]">
                 <AnimatePresence mode="wait">
-                  {step === 1 && <StepOne key="1" data={data} errors={errors} update={update} onNext={nextStep} />}
+                  {step === 1 && (
+                    <StepOne
+                      key="1"
+                      data={data}
+                      errors={errors}
+                      update={update}
+                      onNext={nextStep}
+                    />
+                  )}
                   {step === 2 && (
                     <StepTwo
                       key="2"
@@ -402,7 +442,7 @@ function SuccessScreen() {
       </p>
       <Link
         to="/"
-        className="inline-flex items-center gap-3 rounded-full bg-ivory px-8 py-4 text-[11px] uppercase tracking-[0.2em] text-ink transition-colors hover:bg-[#e7d9ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep"
+        className="inline-flex items-center gap-3 bg-ivory px-8 py-4 text-[11px] uppercase tracking-[0.2em] text-ink transition-colors hover:bg-lavender focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep"
       >
         Return to the Foundry
       </Link>
@@ -644,7 +684,9 @@ function StepTwo({
 
         {/* International budget field */}
         <div>
-          <label className={`text-[10px] uppercase tracking-[0.2em] block mb-3 ${errors.budgetAmount ? 'text-red-400' : 'text-ivory/50'}`}>
+          <label
+            className={`text-[10px] uppercase tracking-[0.2em] block mb-3 ${errors.budgetAmount ? "text-red-400" : "text-ivory/50"}`}
+          >
             Estimated Budget
           </label>
           <div className="flex gap-3 items-end">
@@ -673,7 +715,7 @@ function StepTwo({
                   placeholder="e.g. 15,000"
                   value={data.budgetAmount}
                   onChange={(e) => update("budgetAmount", e.target.value)}
-                  className={`flex-1 bg-transparent border-b py-3 outline-none transition-colors text-ivory placeholder:text-ivory/20 text-sm ${errors.budgetAmount ? 'border-red-500/50 focus:border-red-500' : 'border-ivory/20 focus:border-violet-deep'}`}
+                  className={`flex-1 bg-transparent border-b py-3 outline-none transition-colors text-ivory placeholder:text-ivory/20 text-sm ${errors.budgetAmount ? "border-red-500/50 focus:border-red-500" : "border-ivory/20 focus:border-violet-deep"}`}
                   aria-label="Budget amount"
                 />
               </div>
@@ -866,7 +908,7 @@ function Input({
     <div className="group relative">
       <label
         htmlFor={id}
-        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? 'text-red-400' : 'text-ivory/40 group-focus-within:text-violet-deep/80'}`}
+        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? "text-red-400" : "text-ivory/40 group-focus-within:text-[#00ff80]/80"}`}
       >
         {label}
       </label>
@@ -877,7 +919,7 @@ function Input({
         autoComplete={autocomplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-white/[0.02] border rounded-lg px-4 py-3.5 outline-none transition-all duration-300 text-ivory text-sm placeholder:text-ivory/20 shadow-sm ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-ivory/10 focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10'}`}
+        className={`w-full bg-white/[0.02] backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_1px_0px_rgba(255,255,255,0.05)] border-b px-4 py-4 outline-none transition-all duration-500 text-ivory text-sm placeholder:text-ivory/20 rounded-t-sm ${error ? "border-red-500/50 focus:bg-red-500/5" : "border-ivory/10 focus:bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,128,0.05),transparent_50%),rgba(255,255,255,0.02)] focus:border-[#00ff80]/50"}`}
       />
       {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
     </div>
@@ -903,7 +945,7 @@ function Select({
     <div className="group relative">
       <label
         htmlFor={id}
-        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? 'text-red-400' : 'text-ivory/40 group-focus-within:text-violet-deep/80'}`}
+        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? "text-red-400" : "text-ivory/40 group-focus-within:text-[#00ff80]/80"}`}
       >
         {label}
       </label>
@@ -911,7 +953,7 @@ function Select({
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-white/[0.02] border rounded-lg px-4 py-3.5 outline-none transition-all duration-300 text-ivory text-sm appearance-none cursor-pointer shadow-sm ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-ivory/10 focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10'}`}
+        className={`w-full bg-white/[0.02] backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_1px_0px_rgba(255,255,255,0.05)] border-b px-4 py-4 outline-none transition-all duration-500 text-ivory text-sm appearance-none cursor-pointer rounded-t-sm ${error ? "border-red-500/50 focus:bg-red-500/5" : "border-ivory/10 focus:bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,128,0.05),transparent_50%),rgba(255,255,255,0.02)] focus:border-[#00ff80]/50"}`}
       >
         <option value="" disabled className="bg-ink text-ivory/40">
           Select…
@@ -946,7 +988,7 @@ function Textarea({
     <div className="group relative">
       <label
         htmlFor={id}
-        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? 'text-red-400' : 'text-ivory/40 group-focus-within:text-violet-deep/80'}`}
+        className={`text-[10px] uppercase tracking-[0.2em] block mb-1.5 transition-colors ${error ? "text-red-400" : "text-ivory/40 group-focus-within:text-[#00ff80]/80"}`}
       >
         {label}
       </label>
@@ -956,7 +998,7 @@ function Textarea({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-white/[0.02] border rounded-lg px-4 py-3.5 outline-none transition-all duration-300 text-ivory text-sm placeholder:text-ivory/20 resize-none shadow-sm ${error ? 'border-red-500/50 focus:border-red-500 focus:ring-4 focus:ring-red-500/10' : 'border-ivory/10 focus:bg-white/[0.04] focus:border-violet-deep/50 focus:ring-4 focus:ring-violet-deep/10'}`}
+        className={`w-full bg-white/[0.02] backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.5),inset_0_1px_0px_rgba(255,255,255,0.05)] border-b px-4 py-4 outline-none transition-all duration-500 text-ivory text-sm placeholder:text-ivory/20 resize-none rounded-t-sm ${error ? "border-red-500/50 focus:bg-red-500/5" : "border-ivory/10 focus:bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,128,0.05),transparent_50%),rgba(255,255,255,0.02)] focus:border-[#00ff80]/50"}`}
       />
       {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
     </div>
@@ -979,15 +1021,16 @@ function Button({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`relative overflow-hidden px-8 py-3.5 rounded-full text-[11px] uppercase tracking-[0.2em] transition-all duration-300 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-deep disabled:opacity-40 disabled:cursor-not-allowed group ${secondary
-          ? "border border-ivory/15 text-ivory/70 hover:border-ivory/40 hover:text-ivory bg-transparent"
-          : "bg-ivory text-ink hover:bg-[#e7d9ff] shadow-sm hover:shadow"
-        }`}
+      className={`group relative inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full overflow-hidden transition-all duration-500 backdrop-blur-md border shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00ff80]/50 disabled:opacity-30 disabled:cursor-not-allowed ${
+        secondary
+          ? "bg-transparent border-ivory/10 text-ivory/70 hover:text-ivory hover:border-[#00ff80]/30 hover:bg-white/[0.02]"
+          : "bg-white/[0.03] border-white/20 text-ivory hover:bg-white/[0.08] hover:shadow-[0_0_20px_rgba(0,255,128,0.2),inset_0_1px_2px_rgba(255,255,255,0.3)] hover:border-[#00ff80]/40"
+      }`}
     >
+      <span className="relative z-10 font-mono text-[9px] uppercase tracking-[0.3em]">{children}</span>
       {!secondary && !disabled && (
-        <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-black/10 to-transparent group-hover:animate-[sweep_1.5s_ease-in-out_infinite]" />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[rgba(0,255,128,0.15)] to-transparent skew-x-12 -translate-x-full group-hover:animate-[sweepLine_1.5s_linear_infinite]" />
       )}
-      <span className="relative z-10">{children}</span>
     </button>
   );
 }

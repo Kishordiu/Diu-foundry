@@ -9,17 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as ForgeRouteImport } from './routes/forge'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as WorksIndexRouteImport } from './routes/works/index'
-import { Route as WorksWorkIdRouteImport } from './routes/works/$workId'
 
-const InsightsRoute = InsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ForgeRoute = ForgeRouteImport.update({
   id: '/forge',
   path: '/forge',
@@ -30,64 +22,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorksIndexRoute = WorksIndexRouteImport.update({
-  id: '/works/',
-  path: '/works/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WorksWorkIdRoute = WorksWorkIdRouteImport.update({
-  id: '/works/$workId',
-  path: '/works/$workId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forge': typeof ForgeRoute
-  '/insights': typeof InsightsRoute
-  '/works/$workId': typeof WorksWorkIdRoute
-  '/works/': typeof WorksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forge': typeof ForgeRoute
-  '/insights': typeof InsightsRoute
-  '/works/$workId': typeof WorksWorkIdRoute
-  '/works': typeof WorksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/forge': typeof ForgeRoute
-  '/insights': typeof InsightsRoute
-  '/works/$workId': typeof WorksWorkIdRoute
-  '/works/': typeof WorksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forge' | '/insights' | '/works/$workId' | '/works/'
+  fullPaths: '/' | '/forge'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forge' | '/insights' | '/works/$workId' | '/works'
-  id: '__root__' | '/' | '/forge' | '/insights' | '/works/$workId' | '/works/'
+  to: '/' | '/forge'
+  id: '__root__' | '/' | '/forge'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ForgeRoute: typeof ForgeRoute
-  InsightsRoute: typeof InsightsRoute
-  WorksWorkIdRoute: typeof WorksWorkIdRoute
-  WorksIndexRoute: typeof WorksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/insights': {
-      id: '/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof InsightsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forge': {
       id: '/forge'
       path: '/forge'
@@ -102,29 +65,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/works/': {
-      id: '/works/'
-      path: '/works'
-      fullPath: '/works/'
-      preLoaderRoute: typeof WorksIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/works/$workId': {
-      id: '/works/$workId'
-      path: '/works/$workId'
-      fullPath: '/works/$workId'
-      preLoaderRoute: typeof WorksWorkIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ForgeRoute: ForgeRoute,
-  InsightsRoute: InsightsRoute,
-  WorksWorkIdRoute: WorksWorkIdRoute,
-  WorksIndexRoute: WorksIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,20 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
+ * ─── DIU FOUNDRY DESIGN SYSTEM ─────────────────────────────────────────────
  *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
+ * Cinematic editorial + industrial + technological design language.
+ * Swiss editorial discipline · Japanese restraint · Industrial visual language.
  *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Typography: Space Grotesk (display) + Inter (body)
+ * Palette: Warm off-whites, near-blacks, restrained violet accent
+ * Motion: Defined in src/lib/motion.ts, referenced here as CSS custom properties
  */
 
 @theme inline {
+  /* ── Radii ── */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -26,6 +24,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ── shadcn/ui semantic colors ── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -59,6 +59,8 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── DIU Foundry palette ── */
   --color-ivory: var(--ivory);
   --color-pearl: var(--pearl);
   --color-lavender: var(--lavender);
@@ -67,20 +69,33 @@
   --color-crimson: var(--crimson);
   --color-ink: var(--ink);
   --color-charcoal: var(--charcoal);
-  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --color-stone: var(--stone);
+  --color-forge: var(--forge);
+
+  /* ── Typography ── */
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 :root {
   --radius: 1.25rem;
-  --ivory: #faf9f7;
-  --pearl: #ffffff;
-  --lavender: #f2edff;
+
+  /* ── Foundry palette ── */
+  --ivory: #f5f3ef;
+  --pearl: #faf9f7;
+  --lavender: #ede8f5;
   --violet-deep: #4b2a8f;
   --indigo-muted: #6b6fbf;
   --crimson: #b0223a;
-  --ink: #14131a;
-  --charcoal: #2a2b2e;
+  --ink: #0b0a09;
+  --charcoal: #1a1a1a;
+  --stone: #8a8a8a;
+  --forge: #c8451b;
+
+  /* ── shadcn/ui tokens ── */
   --background: oklch(0.985 0.005 90);
   --foreground: oklch(0.18 0.02 280);
   --card: oklch(1 0 0);
@@ -113,6 +128,19 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* ── Motion tokens ── */
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-entrance: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-cinematic: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-micro: 0.15s;
+  --dur-fast: 0.25s;
+  --dur-ui: 0.35s;
+  --dur-medium: 0.5s;
+  --dur-content: 0.7s;
+  --dur-slow: 1s;
+  --dur-cinematic: 1.2s;
 }
 
 .dark {
@@ -150,40 +178,38 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* ─── Base Layer ──────────────────────────────────────────────────────────── */
+
 @layer base {
   * {
     border-color: var(--color-border);
   }
 
-  body {
-    background-color: var(--ivory);
-    color: var(--ink);
-    font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
   html {
     scroll-behavior: auto;
     overflow-x: hidden;
   }
+
+  body {
+    background-color: var(--ink);
+    color: var(--ivory);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
   ::selection {
     background: var(--violet-deep);
     color: var(--ivory);
   }
 
-  /*
-   * Scroll offset for sticky nav (72px header + 8px breathing room = 80px).
-   * Applied to every section and div with an id so that hash navigation,
-   * Lenis programmatic scroll, and browser Back/Forward all land precisely
-   * below the fixed header — never hidden behind it.
-   */
   section[id],
   div[id] {
     scroll-margin-top: 5rem;
   }
 
-  /* Reduced motion: disable all animations for users who prefer it */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -195,26 +221,167 @@
     }
   }
 
-  @keyframes sweep {
+  /* ── Keyframes ── */
+
+  @keyframes scrollHint {
     0% {
-      transform: translateX(-100%);
+      transform: translateY(0);
+      opacity: 1;
     }
-    50%,
+    50% {
+      transform: translateY(8px);
+      opacity: 0.4;
+    }
     100% {
-      transform: translateX(100%);
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes glowPulse {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes particleDrift {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate(var(--dx, 20px), var(--dy, -30px)) scale(0.3);
+      opacity: 0;
+    }
+  }
+
+  @keyframes filmGrain {
+    0%,
+    100% {
+      background-position: 0% 0%;
+    }
+    10% {
+      background-position: -5% -10%;
+    }
+    20% {
+      background-position: -15% 5%;
+    }
+    30% {
+      background-position: 7% -25%;
+    }
+    40% {
+      background-position: 20% 25%;
+    }
+    50% {
+      background-position: -25% 10%;
+    }
+    60% {
+      background-position: 15% 5%;
+    }
+    70% {
+      background-position: 0% 15%;
+    }
+    80% {
+      background-position: 25% 35%;
+    }
+    90% {
+      background-position: -10% 10%;
+    }
+  }
+
+  @keyframes nodeConnect {
+    0%,
+    100% {
+      stroke-dashoffset: 40;
+      opacity: 0.3;
+    }
+    50% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
+
+  @keyframes sensorPulse {
+    0%,
+    100% {
+      r: 2;
+      opacity: 0.5;
+    }
+    50% {
+      r: 4;
+      opacity: 1;
+    }
+  }
+
+  @keyframes traceLight {
+    0% {
+      stroke-dashoffset: 100;
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes loaderExpand {
+    0% {
+      letter-spacing: 0.5em;
+      opacity: 0;
+      transform: scaleX(0.7);
+    }
+    100% {
+      letter-spacing: 0.35em;
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes sweepLine {
+    0% {
+      transform: scaleX(0);
+    }
+    100% {
+      transform: scaleX(1);
     }
   }
 }
 
+/* ─── Utility Classes ─────────────────────────────────────────────────────── */
+
+/* Typography */
 @utility font-display {
   font-family: var(--font-display);
   font-feature-settings: "lnum";
 }
+
+/* Foundry palette — text */
 @utility text-ink {
   color: var(--ink);
 }
+@utility text-ivory {
+  color: var(--ivory);
+}
 @utility text-charcoal {
   color: var(--charcoal);
+}
+@utility text-stone {
+  color: var(--stone);
 }
 @utility text-violet-deep {
   color: var(--violet-deep);
@@ -222,6 +389,11 @@
 @utility text-crimson {
   color: var(--crimson);
 }
+@utility text-forge {
+  color: var(--forge);
+}
+
+/* Foundry palette — backgrounds */
 @utility bg-ivory {
   background-color: var(--ivory);
 }
@@ -237,6 +409,11 @@
 @utility bg-ink {
   background-color: var(--ink);
 }
+@utility bg-charcoal {
+  background-color: var(--charcoal);
+}
+
+/* Borders */
 @utility border-violet-soft {
   border-color: color-mix(in oklab, var(--violet-deep) 20%, transparent);
 }
@@ -246,11 +423,13 @@
 @utility border-glass-dark {
   border-color: color-mix(in oklab, white 10%, transparent);
 }
+
+/* Gradients */
 @utility grad-lavender {
-  background: linear-gradient(135deg, #f2edff 0%, #e8dcff 40%, #d6c4f5 100%);
+  background: linear-gradient(135deg, #ede8f5 0%, #e0d5f0 40%, #d6c4f5 100%);
 }
 @utility grad-violet-ink {
-  background: linear-gradient(180deg, #14131a 0%, #1a1330 55%, #2a1a55 100%);
+  background: linear-gradient(180deg, #0b0a09 0%, #12101c 55%, #1a1330 100%);
 }
 @utility grad-text {
   background: linear-gradient(120deg, #4b2a8f 0%, #6b6fbf 55%, #b0223a 100%);
@@ -258,63 +437,240 @@
   background-clip: text;
   color: transparent;
 }
-@utility glass-panel {
-  background: color-mix(in oklab, white 55%, transparent);
-  -webkit-backdrop-filter: blur(20px) saturate(110%);
-  backdrop-filter: blur(20px) saturate(110%);
-  border: 1px solid color-mix(in oklab, white 20%, transparent);
-  box-shadow: 0 30px 80px -30px color-mix(in oklab, #4b2a8f 15%, transparent);
-}
-/* On touch/mobile, skip the expensive backdrop-filter */
-@media (pointer: coarse) {
-  .glass-panel {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: color-mix(in oklab, white 85%, transparent);
-  }
-}
-@utility glass-panel-dark {
-  background: color-mix(in oklab, black 30%, transparent);
-  -webkit-backdrop-filter: blur(24px) saturate(110%);
-  backdrop-filter: blur(24px) saturate(110%);
-  border: 1px solid color-mix(in oklab, white 10%, transparent);
-  box-shadow: 0 30px 80px -30px color-mix(in oklab, black 60%, transparent);
-}
-/* On touch/mobile, skip the expensive backdrop-filter */
-@media (pointer: coarse) {
-  .glass-panel-dark {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: color-mix(in oklab, black 60%, transparent);
-  }
-}
+
+/* Shadows */
 @utility premium-shadow {
   box-shadow:
-    0 24px 48px -12px color-mix(in oklab, #14131a 8%, transparent),
-    0 8px 16px -6px color-mix(in oklab, #14131a 4%, transparent);
+    0 24px 48px -12px color-mix(in oklab, #0b0a09 8%, transparent),
+    0 8px 16px -6px color-mix(in oklab, #0b0a09 4%, transparent);
 }
 @utility premium-shadow-hover {
   box-shadow:
-    0 32px 64px -12px color-mix(in oklab, #14131a 12%, transparent),
-    0 16px 32px -8px color-mix(in oklab, #14131a 8%, transparent);
+    0 32px 64px -12px color-mix(in oklab, #0b0a09 12%, transparent),
+    0 16px 32px -8px color-mix(in oklab, #0b0a09 8%, transparent);
 }
+
+/* Hairline separators */
 @utility hairline {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in oklab, #4b2a8f 40%, transparent),
+    color-mix(in oklab, var(--ink) 15%, transparent),
     transparent
   );
   height: 1px;
   width: 100%;
 }
-@utility hairline-v {
+@utility hairline-ivory {
   background: linear-gradient(
-    180deg,
+    90deg,
     transparent,
-    color-mix(in oklab, #4b2a8f 40%, transparent),
+    color-mix(in oklab, var(--ivory) 20%, transparent),
     transparent
   );
-  width: 1px;
+  height: 1px;
+  width: 100%;
+}
+
+/* ── Editorial Grain Texture ── */
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+  z-index: 1;
+  animation: filmGrain 8s steps(1) infinite;
+}
+
+/* ── Animated grain for loaders and overlays ── */
+.grain-anim::before {
+  animation: filmGrain 0.5s steps(1) infinite;
+  opacity: 0.06;
+}
+
+/* ── Chapter label ── */
+@utility chapter-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  color: color-mix(in oklab, currentColor 40%, transparent);
+}
+
+/* ── Editorial section spacing ── */
+@utility section-pad {
+  padding-top: clamp(5rem, 10vh, 10rem);
+  padding-bottom: clamp(5rem, 10vh, 10rem);
+}
+@utility section-pad-lg {
+  padding-top: clamp(6rem, 15vh, 14rem);
+  padding-bottom: clamp(6rem, 15vh, 14rem);
+}
+
+/* ── Container ── */
+@utility foundry-container {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1.25rem, 5vw, 4rem);
+  padding-right: clamp(1.25rem, 5vw, 4rem);
+}
+
+/* ── Glow pulse ── */
+@utility animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* ── Custom cursor styles ── */
+.cursor-canvas {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9998;
+}
+
+.cursor-emblem {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  will-change: transform;
+  mix-blend-mode: screen;
+  color: #00ff80; /* neon green */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    width var(--dur-fast) var(--ease-editorial),
+    height var(--dur-fast) var(--ease-editorial);
+}
+
+.cursor-emblem svg {
+  width: 100%;
   height: 100%;
+  fill: currentColor;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 128, 0.8));
+  transition: transform var(--dur-fast) var(--ease-editorial);
+}
+
+.cursor-emblem.is-active svg {
+  transform: scale(1.5) rotate(45deg);
+}
+
+.cursor-label {
+  pointer-events: none;
+  position: fixed;
+  z-index: 10000;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: #00ff80;
+  mix-blend-mode: screen;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+  text-shadow: 0 0 8px rgba(0, 255, 128, 0.6);
+}
+
+/* Hide custom cursor on touch / reduced-motion */
+@media (pointer: coarse) {
+  .cursor-emblem,
+  .cursor-label {
+    display: none !important;
+  }
+  .cursor-canvas {
+    display: block !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor-emblem,
+  .cursor-label {
+    display: none !important;
+  }
+}
+
+/* ── No scrollbar ── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Capability icon animations ── */
+.icon-orbit {
+  animation: iconOrbit 4s linear infinite;
+  transform-origin: center;
+}
+@keyframes iconOrbit {
+  from {
+    transform: rotate(0deg) translateX(6px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(6px) rotate(-360deg);
+  }
+}
+
+.icon-pulse-path {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: traceLight 2.5s ease-in-out infinite;
+}
+
+.icon-node-pulse {
+  animation: sensorPulse 2s ease-in-out infinite;
+}
+
+/* ── Word reveal line ── */
+.word-reveal-line {
+  display: block;
+  overflow: hidden;
+  line-height: 1.05;
+}
+
+/* ── Typography Additions ── */
+@utility font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ── Glow & Lighting System ── */
+@utility glow-neon {
+  box-shadow:
+    0 0 40px -10px rgba(0, 255, 128, 0.4),
+    0 0 15px -2px rgba(0, 255, 128, 0.6);
+  border-color: rgba(0, 255, 128, 0.8);
+}
+
+@utility glow-chromatic {
+  box-shadow:
+    0 0 30px rgba(75, 42, 143, 0.3),
+    0 0 60px rgba(0, 255, 128, 0.1),
+    0 0 20px rgba(200, 69, 27, 0.2);
+}
+
+.text-glow-neon {
+  text-shadow: 0 0 20px rgba(0, 255, 128, 0.4);
+}
+
+/* ── Project Image Hover Displacement (Basic placeholder) ── */
+.hover-displacement {
+  transition:
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-displacement:hover {
+  transform: scale(1.05) perspective(1000px) rotateX(2deg) rotateY(-2deg);
+  filter: saturate(1.2) contrast(1.1);
 }
